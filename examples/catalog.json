@@ -1,0 +1,14 @@
+{
+  "server": {"name": "fictional-library", "publisher": "Local demo lab"},
+  "tool": {"name": "catalog", "description": "List public book titles from a fictional catalog."},
+  "signals": {
+    "credential_request": false,
+    "scope_violation": false,
+    "hidden_instruction": false,
+    "unapproved_network": false,
+    "verified_publisher": true,
+    "metadata_changes": 0,
+    "unexpected_calls": 0,
+    "response_bytes": 1024
+  }
+}

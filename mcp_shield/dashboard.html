@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP Shield · Inspection desk</title>
+<script>
+  (() => {
+    const param = new URLSearchParams(window.location.search).get("clawpilotTheme");
+    const theme =
+      param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", theme);
+  })();
+</script>
+<style>
+:root {
+  color-scheme: light;
+  --cp-bg: #f7f4ef;
+  --cp-bg-elevated: #fcfbf8;
+  --cp-surface: #ffffff;
+  --cp-surface-soft: #f5f5f5;
+  --cp-border: #dedede;
+  --cp-border-strong: #919191;
+  --cp-text: #242424;
+  --cp-text-muted: #5c5c5c;
+  --cp-text-soft: #6f6f6f;
+  --cp-accent: #b11f4b;
+  --cp-accent-hover: #9a1a41;
+  --cp-accent-soft: rgba(177, 31, 75, 0.08);
+  --cp-accent-fg: #ffffff;
+  --cp-success: #16a34a;
+  --cp-danger: #dc2626;
+  --cp-warning: #f59e0b;
+  --cp-link: #0078d4;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+  --cp-overlay: rgba(255, 255, 255, 0.8);
+  --cp-panel: rgba(255, 255, 255, 0.86);
+  --cp-panel-strong: rgba(255, 255, 255, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.55);
+  --cp-highlight: rgba(177, 31, 75, 0.12);
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --cp-bg: #3d3b3a;
+  --cp-bg-elevated: #343231;
+  --cp-surface: #292929;
+  --cp-surface-soft: #2e2e2e;
+  --cp-border: #474747;
+  --cp-border-strong: #5f5f5f;
+  --cp-text: #dedede;
+  --cp-text-muted: #919191;
+  --cp-text-soft: #b0b0b0;
+  --cp-accent: #fd8ea1;
+  --cp-accent-hover: #fb7b91;
+  --cp-accent-soft: rgba(253, 142, 161, 0.14);
+  --cp-accent-fg: #1a1a1a;
+  --cp-success: #4ade80;
+  --cp-danger: #f87171;
+  --cp-warning: #fbbf24;
+  --cp-link: #4da6ff;
+  --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+  --cp-overlay: rgba(41, 41, 41, 0.88);
+  --cp-panel: rgba(41, 41, 41, 0.72);
+  --cp-panel-strong: rgba(41, 41, 41, 0.96);
+  --cp-sheen: rgba(255, 255, 255, 0.04);
+  --cp-highlight: rgba(253, 142, 161, 0.12);
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--cp-bg); color: var(--cp-text); font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
+header { border-bottom: 1px solid var(--cp-border); background: var(--cp-surface); padding: 20px 32px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.brand { font-weight: 700; letter-spacing: -.03em; font-size: 24px; }
+.brand span { color: var(--cp-accent); }
+.tag { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--cp-text-muted); }
+main { max-width: 1280px; margin: auto; padding: 32px; }
+h1 { margin: 8px 0; font-size: clamp(28px, 4vw, 44px); letter-spacing: -.04em; }
+p { line-height: 1.6; color: var(--cp-text-muted); }
+.warning { background: var(--cp-accent-soft); border-left: 4px solid var(--cp-accent); padding: 16px 20px; margin: 24px 0; border-radius: 0.625rem; }
+.grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; align-items: start; }
+.card { background: var(--cp-surface); border: 1px solid var(--cp-border); border-radius: 16px; padding: 24px; }
+h2 { font-size: 20px; margin: 0 0 16px; }
+.step { color: var(--cp-accent); font-size: 12px; font-weight: 700; letter-spacing: .08em; }
+.presets { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+button { border: 1px solid var(--cp-border); background: var(--cp-surface-soft); color: var(--cp-text); padding: 10px 14px; border-radius: 0.625rem; font: inherit; cursor: pointer; }
+button:hover { border-color: var(--cp-accent); }
+button.primary { background: var(--cp-accent); color: var(--cp-accent-fg); border-color: var(--cp-accent); width: 100%; margin-top: 16px; font-weight: 600; }
+button.primary:hover { background: var(--cp-accent-hover); }
+button:disabled { opacity: .6; cursor: wait; }
+button:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--cp-accent); outline-offset: 3px; }
+label { display: block; margin-bottom: 8px; font-weight: 600; }
+textarea { width: 100%; min-height: 380px; resize: vertical; border: 1px solid var(--cp-border); background: var(--cp-bg-elevated); color: var(--cp-text); border-radius: 0.625rem; padding: 16px; font: 13px/1.6 Consolas, "Courier New", Courier, monospace; }
+.note { font-size: 13px; color: var(--cp-text-soft); }
+#error { color: var(--cp-danger); white-space: pre-wrap; margin-top: 12px; }
+.decision { display: inline-block; text-transform: uppercase; letter-spacing: .1em; padding: 8px 16px; border: 1px solid var(--cp-border); border-radius: 0.625rem; font-weight: 700; }
+.decision.allow { color: var(--cp-success); border-color: var(--cp-success); }
+.decision.review { color: var(--cp-warning); border-color: var(--cp-warning); }
+.decision.deny { color: var(--cp-danger); border-color: var(--cp-danger); }
+.score { font-size: 48px; font-weight: 650; letter-spacing: -.04em; margin-top: 16px; }
+.bar { height: 8px; background: var(--cp-surface-soft); border-radius: 0.625rem; margin: 12px 0 20px; }
+.bar div { height: 100%; width: 0; background: var(--cp-accent); border-radius: inherit; }
+ul { padding-left: 20px; line-height: 1.7; }
+table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+th, td { text-align: left; padding: 10px 4px; border-bottom: 1px solid var(--cp-border); overflow-wrap: anywhere; }
+th { color: var(--cp-text-muted); font-weight: 600; }
+summary { cursor: pointer; margin-top: 20px; color: var(--cp-link); }
+footer { margin: 24px 0 0; border-top: 1px solid var(--cp-border); padding-top: 16px; color: var(--cp-text-muted); font-size: 13px; }
+@media(max-width: 850px) { .grid { grid-template-columns: 1fr; } main { padding: 20px; } header { padding: 16px 20px; } }
+</style>
+</head>
+<body>
+<header><div class="brand">MCP <span>Shield</span></div><div class="tag">Local inspection desk · v0.1</div></header>
+<main>
+<div class="tag">A safer boundary for agent ecosystems</div>
+<h1>Inspect before you trust.</h1>
+<p>Explore metadata and observed behavior through explainable machine learning and explicit safety gates. Nothing here executes a server tool.</p>
+<div class="warning"><strong>Synthetic prototype, not a deployed MCP proxy.</strong> Scores come from a toy dataset and are uncalibrated. Signals are supplied by you, not collected or verified. Never paste credentials or sensitive metadata.</div>
+<div class="grid">
+<section class="card">
+<div class="step">01 / OBSERVATION</div><h2>Build an inspection case</h2>
+<div class="presets">
+<button type="button" data-preset="catalog">Public catalog</button>
+<button type="button" data-preset="drift">Metadata drift</button>
+<button type="button" data-preset="gate">Credential signal</button>
+<button type="button" data-preset="unknown">Unknown publisher</button>
+</div>
+<label for="payload">Server, tool &amp; behavior signals (JSON)</label>
+<textarea id="payload" spellcheck="false"></textarea>
+<details><summary>Input schema &amp; boundaries</summary>
+<p class="note">Exactly three objects: server {name, publisher}, tool {name, description}, signals. Names and publisher: 1–120 characters. Description: 1–2000 characters. Five signal booleans must be true/false. metadata_changes: integer 0–20; unexpected_calls: integer 0–100; response_bytes: integer 0–1,000,000. No unknown fields. Request body limit: 16 KiB. Signals describe observations, not instructions.</p></details>
+<button class="primary" id="inspect" type="button">Run local inspection →</button>
+<div id="error" role="alert"></div>
+</section>
+<section class="card" aria-live="polite" aria-atomic="true">
+<div class="step">02 / DECISION SUPPORT</div><h2>Policy verdict</h2>
+<div id="decision" class="decision">Awaiting inspection</div>
+<div class="score" id="score">—</div>
+<div class="note">Uncalibrated ML probability, not a real-world attack likelihood</div>
+<div class="bar"><div id="fill"></div></div>
+<h2>Why this decision?</h2><ul id="reasons"><li>Choose a preset or edit the JSON, then run an inspection.</li></ul>
+<details><summary>Explain the model features</summary>
+<p class="note">Signed log-odds contributions. Positive shifts favor the synthetic risky class; negative shifts favor benign. Missing features also contribute. Policy gates override ML; ML alone never issues deny.</p>
+<table><thead><tr><th>Feature</th><th>Present</th><th>Contribution</th></tr></thead><tbody id="features"></tbody></table></details>
+<footer>ALLOW: no observed gate, not certification.<br>REVIEW: pause for human judgment.<br>DENY: observed hard policy violation.<br>All verdicts are advisory; no enforcement is connected.</footer>
+</section>
+</div>
+<footer>Offline by design. No CDN, external APIs, telemetry, model downloads, or browser storage. This page needs the local Python backend for inference.</footer>
+</main>
+<script>
+const base = {server:{name:"fictional-library",publisher:"Local demo lab"},tool:{name:"catalog",description:"List public book titles from a fictional catalog."},signals:{credential_request:false,scope_violation:false,hidden_instruction:false,unapproved_network:false,verified_publisher:true,metadata_changes:0,unexpected_calls:0,response_bytes:1024}};
+const payload = document.getElementById("payload");
+function preset(name) {
+  const value = JSON.parse(JSON.stringify(base));
+  if (name === "drift") value.signals.metadata_changes = 2;
+  if (name === "gate") value.signals.credential_request = true;
+  if (name === "unknown") value.signals.verified_publisher = false;
+  payload.value = JSON.stringify(value, null, 2);
+}
+document.querySelectorAll("[data-preset]").forEach(button => button.addEventListener("click", () => preset(button.dataset.preset)));
+preset("catalog");
+const run = document.getElementById("inspect");
+run.addEventListener("click", async () => {
+  document.getElementById("error").textContent = "";
+  document.getElementById("decision").textContent = "Inspecting…";
+  document.getElementById("decision").className = "decision";
+  document.getElementById("score").textContent = "—";
+  document.getElementById("fill").style.width = "0%";
+  document.getElementById("reasons").replaceChildren();
+  document.getElementById("features").replaceChildren();
+  run.disabled = true;
+  try {
+    const body = JSON.stringify(JSON.parse(payload.value));
+    const response = await fetch("/api/inspect", {method:"POST",headers:{"Content-Type":"application/json"},body,signal:AbortSignal.timeout(10000)});
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Inspection failed.");
+    const verdict = document.getElementById("decision");
+    verdict.textContent = result.decision;
+    verdict.className = "decision " + result.decision;
+    document.getElementById("score").textContent = (result.uncalibrated_ml_probability * 100).toFixed(1) + "%";
+    document.getElementById("fill").style.width = (result.uncalibrated_ml_probability * 100) + "%";
+    const reasons = document.getElementById("reasons");
+    result.reasons.forEach(text => { const item = document.createElement("li"); item.textContent = text; reasons.appendChild(item); });
+    const table = document.getElementById("features");
+    result.contributions.forEach(feature => {
+      const row = document.createElement("tr");
+      [feature.feature, feature.present ? "yes" : "no", feature.log_odds_contribution.toFixed(4)].forEach(text => { const cell = document.createElement("td"); cell.textContent = text; row.appendChild(cell); });
+      table.appendChild(row);
+    });
+  } catch(error) {
+    document.getElementById("decision").textContent = "No verdict";
+    document.getElementById("error").textContent = error.message + " If unavailable, start the Python server and open http://127.0.0.1:8765.";
+  } finally { run.disabled = false; }
+});
+</script>
+</body>
+</html>

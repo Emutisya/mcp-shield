@@ -1,0 +1,138 @@
+{
+  "data": "Explicitly synthetic; latent toy labels, not verified attacks.",
+  "seed": 17,
+  "train_rows": 800,
+  "test_rows": 400,
+  "split": "Whole families held out; description templates disjoint; names/tags excluded from features.",
+  "train_families": [
+    "archive",
+    "garden",
+    "harbor",
+    "ledger",
+    "library",
+    "museum",
+    "transit",
+    "weather"
+  ],
+  "test_families": [
+    "clinic",
+    "energy",
+    "forest",
+    "school"
+  ],
+  "ml_threshold": 0.5,
+  "ml": {
+    "tp": 157,
+    "fp": 19,
+    "tn": 197,
+    "fn": 27,
+    "accuracy": 0.885,
+    "precision": 0.892,
+    "recall": 0.8533
+  },
+  "always_benign_baseline": {
+    "tp": 0,
+    "fp": 0,
+    "tn": 216,
+    "fn": 184,
+    "accuracy": 0.54,
+    "precision": null,
+    "recall": 0.0
+  },
+  "policy_nonallow_as_positive": {
+    "tp": 179,
+    "fp": 129,
+    "tn": 87,
+    "fn": 5,
+    "accuracy": 0.665,
+    "precision": 0.5812,
+    "recall": 0.9728
+  },
+  "policy_decisions": {
+    "allow": 92,
+    "review": 152,
+    "deny": 156
+  },
+  "ml_failure_count": 46,
+  "first_12_ml_failures": [
+    {
+      "id": "school-1",
+      "label": 1,
+      "decision": "deny",
+      "score": 0.259654
+    },
+    {
+      "id": "school-2",
+      "label": 1,
+      "decision": "review",
+      "score": 0.326796
+    },
+    {
+      "id": "school-3",
+      "label": 1,
+      "decision": "allow",
+      "score": 0.165174
+    },
+    {
+      "id": "school-20",
+      "label": 0,
+      "decision": "review",
+      "score": 0.551272
+    },
+    {
+      "id": "school-31",
+      "label": 1,
+      "decision": "deny",
+      "score": 0.350171
+    },
+    {
+      "id": "school-41",
+      "label": 0,
+      "decision": "deny",
+      "score": 0.840996
+    },
+    {
+      "id": "school-43",
+      "label": 1,
+      "decision": "deny",
+      "score": 0.345448
+    },
+    {
+      "id": "school-47",
+      "label": 1,
+      "decision": "deny",
+      "score": 0.177027
+    },
+    {
+      "id": "school-51",
+      "label": 1,
+      "decision": "review",
+      "score": 0.326796
+    },
+    {
+      "id": "school-63",
+      "label": 1,
+      "decision": "deny",
+      "score": 0.259654
+    },
+    {
+      "id": "school-67",
+      "label": 1,
+      "decision": "allow",
+      "score": 0.199172
+    },
+    {
+      "id": "school-79",
+      "label": 1,
+      "decision": "deny",
+      "score": 0.398825
+    }
+  ],
+  "limitations": [
+    "All numbers measure toy synthetic distributions, not real-world detection.",
+    "Signal provenance is trusted; unseen attacks and dishonest signals can pass.",
+    "Feature vectors overlap across splits intentionally, but source templates do not.",
+    "Scores are uncalibrated; no calibration or real attack corpus is available.",
+    "Review is not deny; binary policy metrics count both as nonallow."
+  ]
+}
