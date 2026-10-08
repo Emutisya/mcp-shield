@@ -24,6 +24,8 @@ def main():
     s.add_argument("--model", default="models/baseline.model.json")
     s.add_argument("--port", type=int, default=8765)
     args = parser.parse_args()
+    if args.command == "serve" and not 0 <= args.port <= 65535:
+        parser.error("--port must be between 0 and 65535; use 0 to choose an available port.")
     try:
         if args.command == "train":
             rows, _ = split(dataset(args.seed))
