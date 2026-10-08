@@ -53,6 +53,13 @@ Those integration boundaries are explicit in the roadmap below.
 
 ## Quickstart
 
+Clone the standalone project:
+
+```powershell
+git clone https://github.com/Emutisya/mcp-shield.git
+Set-Location mcp-shield
+```
+
 Python 3.10+; no runtime dependencies, keys, APIs, downloaded weights, or LLMs.
 From this project directory in PowerShell:
 
@@ -75,6 +82,23 @@ the `mcp-shield` command. Direct `python -m mcp_shield` execution requires no
 installation. Models are locally generated in ignored `models\`.
 `train` and `evaluate` accept `--seed`; `serve` accepts `--port`.
 Missing or incompatible models produce a CLI error: run `train` first.
+
+### Run alongside the other projects
+
+Every project defaults to port 8765. To run all four at once, keep MCP Shield on
+8765 and use 8766 for Street to School Guardian, 8767 for Fursa, and 8768 for
+Maternity Health Copilot. Run each server in its own terminal.
+
+For an automatically selected available port:
+
+```powershell
+python -m mcp_shield serve --port 0
+```
+
+Open the URL printed by the server. Its health endpoint is that URL followed by
+`/health`. Valid ports are 0 through 65535; invalid values are rejected before
+the model is loaded. If a chosen port is busy, select another rather than stopping
+an unrelated process.
 
 ## Input contract
 
