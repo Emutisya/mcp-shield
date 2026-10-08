@@ -1,13 +1,55 @@
 # MCP Shield
 
-**Inspect before you trust.** A runnable, offline defensive experiment for the
-boundary between MCP servers and AI agents: explainable classical ML plus
-deterministic policy gates, with a local inspection dashboard.
+### Intelligence needs a trust boundary.
 
-**This is not an MCP proxy, attack detector certification, or production firewall.**
-It does not connect to MCP servers, execute tools, forward responses, or enforce
-decisions. Metadata and behavior observations are supplied by the caller.
-Training and evaluation use explicitly synthetic data only.
+**MCP Shield is an explainable inspection engine for the moment an AI agent
+is asked to trust a tool.** It turns caller-observed MCP server behavior into
+an advisory **allow, review, or deny** decision, combining a learned behavioral
+classifier with explicit safety policy and feature-level explanations.
+
+[![CI](https://github.com/Emutisya/mcp-shield/actions/workflows/ci.yml/badge.svg)](https://github.com/Emutisya/mcp-shield/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+## The invention thesis
+
+AI agents extend their reach through tools. That same connection creates a trust
+problem: a useful tool description does not establish that the tool will respect
+its permissions, protect secrets, or behave consistently after approval.
+
+MCP Shield explores a different contract: **a tool's claimed capability should be
+accompanied by inspectable behavioral evidence before an agent relies on it.**
+The working core makes that evidence visible instead of collapsing it into an
+opaque score.
+
+The global ambition is a trust infrastructure for agent ecosystems: portable
+inspection evidence, accountable review, and independently verified controls
+that could help organizations adopt agent tooling without giving every tool
+unconditional access.
+
+## Experience the working system
+
+| Step | What MCP Shield does today |
+| --- | --- |
+| Observe | Accepts bounded metadata and eight caller-supplied behavior signals |
+| Inspect | Runs a trained Bernoulli naive Bayes model locally |
+| Apply policy | Prioritizes explicit gates for credential requests, scope violations, hidden instructions and unapproved network activity |
+| Explain | Shows the verdict, triggered policy and signed feature contributions |
+| Challenge | Replays synthetic cases and reports both missed cases and false alarms |
+
+The dashboard makes it possible to change an observation and see how the model
+and policy respond. Inference runs in Python, not a prerecorded UI simulation.
+
+### Design choices that matter
+
+- **Policy remains accountable.** Explicit gates can override the learned score.
+- **Evidence stays inspectable.** Feature contributions and failure cases are exposed.
+- **The core works offline.** No external model service, API key or downloaded weights.
+- **Inference is not execution.** Inspection never invokes a tool or follows its instructions.
+
+**Current release:** a working local research prototype using synthetic data.
+It inspects supplied observations; it is not yet an MCP transport proxy and
+does not collect server telemetry, forward responses or enforce its verdicts.
+Those integration boundaries are explicit in the roadmap below.
 
 ## Quickstart
 
@@ -79,7 +121,7 @@ each present or absent feature; they are correlations, not causal evidence.
 Name/publisher text never influences the classifier, and publisher verification
 is not inferred from a name or domain.
 
-## Real ML, deliberately modest
+## The intelligence engine
 
 `core.py` implements **Bernoulli naive Bayes from scratch**, not a keyword rule
 masquerading as training. For each class and binary feature, it estimates
@@ -164,7 +206,7 @@ Keep it offline with synthetic inputs. Independent review, representative
 consented data, calibration, and rigorous integration work are prerequisites for
 even a limited production trial.
 
-## A bold global roadmap, without invented progress
+## From working core to global trust infrastructure
 
 These are aspirations, not delivered capabilities:
 
