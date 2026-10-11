@@ -93,6 +93,29 @@ class ShieldTests(unittest.TestCase):
         item["tool"]["name"] = "new_name"
         self.assertEqual(features(item), features(self.sample))
 
+    def test_invalid_dataset_parameters_are_rejected(self):
+        for seed, count in ((True, 100), ("17", 100), (17, True),
+                            (17, 0), (17, -1), (17, 1.5)):
+            with self.subTest(seed=seed, count=count), self.assertRaises(ValueError):
+                dataset(seed, count)
+
+    def test_split_checks_reject_missing_groups_duplicates_and_family_leakage(self):
+        leaking = copy.deepcopy(self.rows)
+        leaking[-1]["family"] = leaking[0]["family"]
+        invalid = copy.deepcopy(self.rows)
+        invalid[0]["split"] = "unknown"
+        for rows in ([], self.training, invalid, [*self.rows, self.rows[0]], leaking):
+            with self.assertRaises(ValueError):
+                split(rows)
+        script = (
+            "from mcp_shield.data import dataset,split; rows=dataset(); "
+            "rows[-1]['family']=rows[0]['family']; split(rows)"
+        )
+        result = subprocess.run([sys.executable, "-O", "-c", script],
+                                cwd=ROOT, text=True, capture_output=True, timeout=10)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("families must be disjoint", result.stderr)
+
     def test_report_exposes_failures(self):
         report = evaluate()
         self.assertGreater(report["ml"]["fn"], 0)

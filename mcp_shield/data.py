@@ -19,6 +19,10 @@ FAMILIES = (
 
 
 def dataset(seed=17, per_family=100):
+    if type(seed) is not int:
+        raise ValueError("Synthetic dataset seed must be an integer.")
+    if type(per_family) is not int or per_family < 1:
+        raise ValueError("Synthetic examples per family must be a positive integer.")
     rng = random.Random(seed)
     rows = []
     for i, (family, ordinary, unusual) in enumerate(FAMILIES):
@@ -42,7 +46,21 @@ def dataset(seed=17, per_family=100):
 
 
 def split(rows):
+    if not isinstance(rows, (list, tuple)) or not rows:
+        raise ValueError("Split requires a nonempty sequence of synthetic examples.")
+    ids = set()
+    for row in rows:
+        if (not isinstance(row, dict) or row.get("split") not in ("train", "test")
+                or not isinstance(row.get("family"), str) or not row["family"]
+                or not isinstance(row.get("id"), str) or not row["id"]):
+            raise ValueError("Each example requires an ID, family and train or test split.")
+        if row["id"] in ids:
+            raise ValueError("Duplicate example IDs are not accepted across splits.")
+        ids.add(row["id"])
     train_rows = [r for r in rows if r["split"] == "train"]
     test_rows = [r for r in rows if r["split"] == "test"]
-    assert not {r["family"] for r in train_rows} & {r["family"] for r in test_rows}
+    if not train_rows or not test_rows:
+        raise ValueError("Both training and held-out examples are required.")
+    if {r["family"] for r in train_rows} & {r["family"] for r in test_rows}:
+        raise ValueError("Training and held-out families must be disjoint.")
     return train_rows, test_rows
