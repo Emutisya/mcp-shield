@@ -25,3 +25,12 @@ class DiagnosticTests(unittest.TestCase):
         self.assertIsNone(absent_positive["balanced_accuracy"])
         self.assertIsNone(absent_positive["f1"])
         self.assertIsNone(metrics([(1, 1)])["specificity"])
+
+    def test_comparator_baselines_use_same_heldout_labels(self):
+        from mcp_shield.evaluation import evaluate
+        report = evaluate()
+        gates = report["hard_gates_only_baseline"]
+        self.assertEqual(gates["tp"] + gates["fp"], report["policy_decisions"]["deny"])
+        self.assertEqual(report["always_positive_baseline"]["fn"], 0)
+        self.assertEqual(report["always_positive_baseline"]["tn"], 0)
+        self.assertEqual(gates["positive_labels"], report["ml"]["positive_labels"])

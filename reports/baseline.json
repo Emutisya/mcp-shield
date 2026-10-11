@@ -56,6 +56,38 @@
     "precision": null,
     "recall": 0.0
   },
+  "hard_gates_only_baseline": {
+    "tp": 126,
+    "fp": 30,
+    "tn": 186,
+    "fn": 58,
+    "support": 400,
+    "positive_labels": 184,
+    "specificity": 0.8611,
+    "false_positive_rate": 0.1389,
+    "false_negative_rate": 0.3152,
+    "f1": 0.7412,
+    "balanced_accuracy": 0.7729,
+    "accuracy": 0.78,
+    "precision": 0.8077,
+    "recall": 0.6848
+  },
+  "always_positive_baseline": {
+    "tp": 184,
+    "fp": 216,
+    "tn": 0,
+    "fn": 0,
+    "support": 400,
+    "positive_labels": 184,
+    "specificity": 0.0,
+    "false_positive_rate": 1.0,
+    "false_negative_rate": 0.0,
+    "f1": 0.6301,
+    "balanced_accuracy": 0.5,
+    "accuracy": 0.46,
+    "precision": 0.46,
+    "recall": 1.0
+  },
   "policy_nonallow_as_positive": {
     "tp": 179,
     "fp": 129,

@@ -99,6 +99,9 @@ diagnostics do not select thresholds, tune the model, or alter hard gates.
 Confusion summaries also expose support, positive-label counts, specificity,
 false-positive/negative rates, F1 and balanced accuracy. Undefined denominators
 remain JSON null rather than implying perfect performance.
+Hard-gates-only and always-positive comparators complement always-benign, using
+the same held-out labels. They expose the tradeoffs of deterministic observation
+gates and maximum alert burden; none is an alternative execution policy.
 
 ### Run alongside the other projects
 

@@ -2,7 +2,7 @@
 
 import hashlib
 import json
-from .core import inspect, train
+from .core import FLAGS, inspect, train
 from .data import dataset, split
 
 
@@ -59,6 +59,9 @@ def evaluate(seed=17):
             "display_score_decimal_places": 12,
             "ml": metrics([(r["label"], int(p["uncalibrated_ml_probability"] >= 0.5)) for r, p in results]),
             "always_benign_baseline": metrics([(r["label"], 0) for r in heldout]),
+            "hard_gates_only_baseline": metrics([(r["label"], int(any(r["input"]["signals"][f] for f in FLAGS)))
+                                                for r in heldout]),
+            "always_positive_baseline": metrics([(r["label"], 1) for r in heldout]),
             "policy_nonallow_as_positive": metrics([(r["label"], int(p["decision"] != "allow")) for r, p in results]),
             "policy_decisions": {d: sum(p["decision"] == d for _, p in results) for d in ("allow", "review", "deny")},
             "ml_failure_count": len(failures), "first_12_ml_failures": failures[:12],
