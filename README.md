@@ -102,6 +102,8 @@ remain JSON null rather than implying perfect performance.
 Hard-gates-only and always-positive comparators complement always-benign, using
 the same held-out labels. They expose the tradeoffs of deterministic observation
 gates and maximum alert burden; none is an alternative execution policy.
+`decision_burden` separates allow/review/deny fractions and their synthetic label
+mix, so review workload is not hidden inside a binary nonallow metric.
 
 ### Run alongside the other projects
 

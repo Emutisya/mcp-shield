@@ -23,3 +23,15 @@ def threshold_sweep(rows, thresholds=(0, .25, .5, .65, .75, 1)):
         raise ValueError("Supply 1–101 distinct finite thresholds in [0,1].")
     return [{"threshold": t, **metrics([(r["label"], int(r["score"] >= t)) for r in rows])}
             for t in sorted(thresholds)]
+
+
+def decision_burden(rows):
+    labelled_scores(rows)
+    if any(r.get("decision") not in ("allow", "review", "deny") for r in rows):
+        raise ValueError("Each burden row requires an allow, review or deny decision.")
+    return {decision: {
+        "rows": sum(r["decision"] == decision for r in rows),
+        "benign_labels": sum(r["decision"] == decision and r["label"] == 0 for r in rows),
+        "positive_labels": sum(r["decision"] == decision and r["label"] == 1 for r in rows),
+        "fraction": round(sum(r["decision"] == decision for r in rows) / len(rows), 4),
+    } for decision in ("allow", "review", "deny")}

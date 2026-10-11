@@ -109,6 +109,26 @@
     "review": 152,
     "deny": 156
   },
+  "decision_burden": {
+    "allow": {
+      "rows": 92,
+      "benign_labels": 87,
+      "positive_labels": 5,
+      "fraction": 0.23
+    },
+    "review": {
+      "rows": 152,
+      "benign_labels": 99,
+      "positive_labels": 53,
+      "fraction": 0.38
+    },
+    "deny": {
+      "rows": 156,
+      "benign_labels": 30,
+      "positive_labels": 126,
+      "fraction": 0.39
+    }
+  },
   "ml_failure_count": 46,
   "first_12_ml_failures": [
     {

@@ -31,7 +31,7 @@ def metrics(pairs):
 
 
 def evaluate(seed=17):
-    from .diagnostics import threshold_sweep
+    from .diagnostics import decision_burden, threshold_sweep
     training, heldout = split(dataset(seed))
     model = train(training)
     results = [(r, inspect(r["input"], model)) for r in heldout]
@@ -64,6 +64,8 @@ def evaluate(seed=17):
             "always_positive_baseline": metrics([(r["label"], 1) for r in heldout]),
             "policy_nonallow_as_positive": metrics([(r["label"], int(p["decision"] != "allow")) for r, p in results]),
             "policy_decisions": {d: sum(p["decision"] == d for _, p in results) for d in ("allow", "review", "deny")},
+            "decision_burden": decision_burden([{"label": r["label"], "score": p["uncalibrated_ml_probability"],
+                                                "decision": p["decision"]} for r, p in results]),
             "ml_failure_count": len(failures), "first_12_ml_failures": failures[:12],
             "per_family": per_family,
             "threshold_sweep": threshold_sweep([{"label": r["label"], "score": p["uncalibrated_ml_probability"]}

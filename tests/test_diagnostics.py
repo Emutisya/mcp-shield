@@ -34,3 +34,13 @@ class DiagnosticTests(unittest.TestCase):
         self.assertEqual(report["always_positive_baseline"]["fn"], 0)
         self.assertEqual(report["always_positive_baseline"]["tn"], 0)
         self.assertEqual(gates["positive_labels"], report["ml"]["positive_labels"])
+
+    def test_burden_separates_review_from_denial(self):
+        from mcp_shield.diagnostics import decision_burden
+        rows = [dict(r, decision=d) for r, d in zip(self.rows, ("allow", "review", "deny", "review"))]
+        burden = decision_burden(rows)
+        self.assertEqual(burden["review"]["benign_labels"], 1)
+        self.assertEqual(burden["deny"]["positive_labels"], 1)
+        self.assertEqual(sum(v["rows"] for v in burden.values()), 4)
+        with self.assertRaises(ValueError):
+            decision_burden(self.rows)
