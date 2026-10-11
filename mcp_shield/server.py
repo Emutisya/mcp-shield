@@ -1,17 +1,21 @@
 """Loopback-only HTTP inference. No MCP connection, tool execution, or URL fetching."""
 
 import json
+import copy
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
 from urllib.parse import urlsplit
 
 from .core import inspect, unique_fields, validate_model
+from .offline import fingerprint, model_info
 
 MAX_BODY = 16384
 
 
 def make_server(model, port=8765):
     validate_model(model)
+    model = copy.deepcopy(model)
+    model_identity = fingerprint(model)
 
     class Handler(BaseHTTPRequestHandler):
         def setup(self):
@@ -56,7 +60,10 @@ def make_server(model, port=8765):
             if path == "/":
                 self.respond(200, files("mcp_shield").joinpath("dashboard.html").read_text(encoding="utf-8"), "text/html")
             elif path == "/health":
-                self.respond(200, '{"status":"ok","mode":"offline-synthetic-simulator"}')
+                self.respond(200, json.dumps({"status": "ok", "mode": "offline-synthetic-simulator",
+                                              "model_sha256": model_identity, "training_rows": model["training_rows"]}))
+            elif path == "/api/model":
+                self.respond(200, json.dumps(model_info(model)))
             else:
                 self.respond(404, '{"error":"Route not found."}')
 

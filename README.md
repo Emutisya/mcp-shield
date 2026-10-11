@@ -238,6 +238,10 @@ not statistical uncertainty, confidence intervals or a recommendation to tune.
 synthetic ML mistakes per response with content identity and total-match count.
 `fp`, `fn` and `all` refer only to toy labels; unknown families are errors,
 and an exhausted page is an explicit empty result rather than a failed request.
+The HTTP service snapshots its validated model at startup so external in-process
+mutation cannot silently change inference. `/health` identifies that model by
+unsigned content hash; `GET /api/model` exposes the same local parameter
+introspection as `model-info`, not authentication or verified provenance.
 
 ### Run alongside the other projects
 
