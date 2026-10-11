@@ -106,6 +106,9 @@ gates and maximum alert burden; none is an alternative execution policy.
 mix, so review workload is not hidden inside a binary nonallow metric.
 Every held-out family has the same policy confusion and decision-burden
 breakdowns, exposing family-specific false alarms and allowed positive labels.
+`inspect --receipt` adds canonical SHA-256 observation/model identities without
+echoing metadata. Batch exports include these identities too. These are unsigned
+content hashes, not publisher authentication or independent verification.
 
 ### Run alongside the other projects
 

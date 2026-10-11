@@ -7,7 +7,7 @@ from pathlib import Path
 from .core import inspect, load_model, train, unique_fields
 from .data import dataset, split
 from .evaluation import evaluate
-from .offline import inspect_batch, read_document
+from .offline import inspect_batch, read_document, receipt
 from .server import MAX_BODY, make_server
 
 
@@ -38,6 +38,7 @@ def main():
     i = sub.add_parser("inspect", help="Inspect JSON metadata; never execute tools")
     i.add_argument("input")
     i.add_argument("--model", default="models/baseline.model.json")
+    i.add_argument("--receipt", action="store_true", help="Include unsigned canonical content identities")
     b = sub.add_parser("batch", help="Inspect 1–100 synthetic observations atomically, offline")
     b.add_argument("input", help="JSON array of complete observation objects")
     b.add_argument("--model", default="models/baseline.model.json")
@@ -66,7 +67,8 @@ def main():
             if not 0 < len(raw) <= MAX_BODY:
                 raise ValueError(f"Inspection input must be 1 to {MAX_BODY} bytes.")
             value = json.loads(raw.decode("utf-8"), object_pairs_hook=unique_fields)
-            print(json.dumps(inspect(value, load_model(args.model)), indent=2))
+            operation = receipt if args.receipt else inspect
+            print(json.dumps(operation(value, load_model(args.model)), indent=2))
         elif args.command == "batch":
             report = json.dumps(inspect_batch(read_document(args.input), load_model(args.model)), indent=2) + "\n"
             if args.output:

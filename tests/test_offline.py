@@ -46,3 +46,14 @@ class OfflineTests(unittest.TestCase):
         self.assertEqual(report["ml"]["fn"], 184)
         self.assertEqual(report["first_12_ml_failures"][0]["score"], .5)
         self.assertEqual(report["display_score_decimal_places"], 12)
+
+    def test_receipts_are_order_independent_and_content_sensitive(self):
+        from mcp_shield.offline import fingerprint, receipt
+        self.assertEqual(fingerprint({"b": 1, "a": 2}), fingerprint({"a": 2, "b": 1}))
+        value = copy.deepcopy(self.sample)
+        value["server"]["name"] = "Different fictional name"
+        a, b = receipt(self.sample, self.model), receipt(value, self.model)
+        self.assertNotEqual(a["observation_sha256"], b["observation_sha256"])
+        self.assertEqual(a["result"], b["result"])
+        self.assertEqual(a["model_sha256"], b["model_sha256"])
+        self.assertNotIn("server", a)

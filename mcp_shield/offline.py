@@ -1,9 +1,10 @@
 """Bounded offline analysis of synthetic caller-supplied observations."""
 
 import json
+import hashlib
 from pathlib import Path
 
-from .core import inspect, unique_fields, validate
+from .core import inspect, unique_fields, validate, validate_model
 
 WARNING = "Offline synthetic simulation only; observations are caller supplied, not independently verified."
 MAX_BATCH = 100
@@ -28,5 +29,20 @@ def inspect_batch(values, model):
             raise ValueError(f"Batch item {index}: {exc}") from exc
     results = [inspect(value, model) for value in values]
     return {"warning": WARNING, "rows": len(results), "results": results,
+            "model_sha256": fingerprint(validate_model(model)),
+            "observation_sha256": [fingerprint(value) for value in values],
             "decisions": {d: sum(r["decision"] == d for r in results)
                           for d in ("allow", "review", "deny")}}
+
+
+def fingerprint(value):
+    """Canonical content identity, not authentication or independent verification."""
+    serialized = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, allow_nan=False)
+    return hashlib.sha256(serialized.encode("ascii")).hexdigest()
+
+
+def receipt(value, model):
+    result = inspect(value, model)
+    return {"warning": WARNING, "format_version": 1,
+            "observation_sha256": fingerprint(value), "model_sha256": fingerprint(model),
+            "result": result, "provenance": "Unsigned content hashes; not evidence of source authenticity."}
