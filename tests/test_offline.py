@@ -172,3 +172,13 @@ class OfflineTests(unittest.TestCase):
             with redirect_stdout(io.StringIO()), self.assertRaises(SystemExit) as exit:
                 main()
             self.assertEqual(exit.exception.code, 1)
+
+    def test_schema_rejects_non_scalar_unicode_and_c1_controls(self):
+        from mcp_shield.core import validate
+        value = copy.deepcopy(self.sample)
+        for text in ("bad\ud800name", "bad\udfffname", "bad\x85name", "bad\x7fname"):
+            value["server"]["name"] = text
+            with self.assertRaisesRegex(ValueError, "server.name"):
+                validate(value)
+        value["server"]["name"] = "Fictional café 🌿"
+        self.assertEqual(validate(value), value)

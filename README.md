@@ -141,6 +141,9 @@ and excluded metadata without loading a model. It issues no advisory verdict.
 `validate observations.json` reports every invalid item in a bounded batch,
 without inference or model loading. Exit status 1 means invalid observations,
 2 means command/document failure, 0 means schema-valid only, never “safe”.
+Metadata rejects isolated UTF-16 surrogate code points and C1/DEL controls,
+including JSON-escaped forms. Ordinary Unicode scalar text remains accepted;
+acceptance does not imply language-model coverage.
 
 ### Run alongside the other projects
 

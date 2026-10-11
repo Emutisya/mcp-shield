@@ -36,7 +36,8 @@ def validate(value):
             limit = 2000 if field == "description" else 120
             if not isinstance(text, str) or not text.strip() or len(text) > limit:
                 raise ValueError(f"{key}.{field} must be nonempty text, at most {limit} characters.")
-            if any(ord(c) < 32 and c not in "\n\t" for c in text):
+            if any((ord(c) < 32 and c not in "\n\t") or 127 <= ord(c) <= 159
+                   or 0xD800 <= ord(c) <= 0xDFFF for c in text):
                 raise ValueError(f"{key}.{field} contains unsupported control characters.")
     signals = value["signals"]
     if not isinstance(signals, dict) or set(signals) != SIGNALS:
