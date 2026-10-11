@@ -31,7 +31,7 @@ def metrics(pairs):
 
 
 def evaluate(seed=17, include_predictions=False):
-    from .diagnostics import classifier_policy_cross_tab, decision_burden, feature_dependence, feature_distribution, ranking_diagnostics, score_histogram, threshold_sweep
+    from .diagnostics import classifier_policy_cross_tab, decision_burden, feature_dependence, feature_distribution, probability_losses, ranking_diagnostics, score_histogram, threshold_sweep
     if type(include_predictions) is not bool:
         raise ValueError("include_predictions must be boolean.")
     training, heldout = split(dataset(seed))
@@ -86,6 +86,8 @@ def evaluate(seed=17, include_predictions=False):
             "training_feature_dependence": feature_dependence(training),
             "ranking": ranking_diagnostics([{"label": r["label"], "score": p["uncalibrated_ml_probability"]} for r, p in results]),
             "score_histogram": score_histogram([{"label": r["label"], "score": p["uncalibrated_ml_probability"]} for r, p in results]),
+            "probability_losses": probability_losses([{"label": r["label"], "score": p["uncalibrated_ml_probability"]} for r, p in results]),
+            "training_prior_probability_baseline": probability_losses([{"label": r["label"], "score": model["prior"]} for r in heldout]),
             "gate_count_histogram": {str(count): sum(len(p["gates"]) == count for _, p in results)
                                      for count in range(len(FLAGS) + 1)},
             "ml_failure_count": len(failures), "first_12_ml_failures": failures[:12],

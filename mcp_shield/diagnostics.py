@@ -106,3 +106,15 @@ def score_histogram(rows):
                        "ml_errors": sum(int(r["score"] >= .5) != r["label"] for r in group),
                        "mean_score": round(math.fsum(r["score"] for r in group) / len(group), 12) if group else None})
     return result
+
+
+def probability_losses(rows):
+    labelled_scores(rows)
+    impossible = sum((r["label"] == 1 and r["score"] == 0) or
+                     (r["label"] == 0 and r["score"] == 1) for r in rows)
+    loss = None if impossible else math.fsum(
+        -math.log(r["score"]) if r["label"] else -math.log1p(-r["score"]) for r in rows) / len(rows)
+    return {"brier": round(math.fsum((r["score"] - r["label"]) ** 2 for r in rows) / len(rows), 12),
+            "log_loss": round(loss, 12) if loss is not None else None,
+            "infinite_log_loss_rows": impossible,
+            "boundary": "Toy-label probability losses only; no calibration is performed or established."}

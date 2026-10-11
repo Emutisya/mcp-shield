@@ -1482,6 +1482,18 @@
       "mean_score": 0.955337300303
     }
   ],
+  "probability_losses": {
+    "brier": 0.076041188981,
+    "log_loss": 0.242997306989,
+    "infinite_log_loss_rows": 0,
+    "boundary": "Toy-label probability losses only; no calibration is performed or established."
+  },
+  "training_prior_probability_baseline": {
+    "brier": 0.248423890399,
+    "log_loss": 0.689991899867,
+    "infinite_log_loss_rows": 0,
+    "boundary": "Toy-label probability losses only; no calibration is performed or established."
+  },
   "gate_count_histogram": {
     "0": 244,
     "1": 103,

@@ -189,6 +189,10 @@ It describes synthetic score ordering, not calibration or real-world detection.
 Fixed score bins expose label counts, mean score and ML errors around both model
 and review thresholds. Bins are left-inclusive; only the last includes its upper
 bound of 1. Empty bins remain visible. This does not calibrate the probabilities.
+Toy-label Brier and log losses are compared with the learned training-prior
+probability baseline. Impossible endpoint predictions expose an infinite-loss
+row count and null overall log loss, not silently clipped probabilities.
+These descriptive losses do not establish calibration or real-world safety.
 
 ### Run alongside the other projects
 

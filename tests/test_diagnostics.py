@@ -126,3 +126,13 @@ class DiagnosticTests(unittest.TestCase):
         self.assertEqual([b["rows"] for b in result], [1, 0, 1, 1, 1])
         self.assertIsNone(result[1]["mean_score"])
         self.assertEqual(sum(b["ml_errors"] for b in result), 1)
+
+    def test_probability_losses_handle_exact_endpoint_errors_without_nan(self):
+        from mcp_shield.diagnostics import probability_losses
+        perfect = probability_losses([{"label": 0, "score": 0}, {"label": 1, "score": 1}])
+        self.assertEqual(perfect["brier"], 0)
+        self.assertEqual(perfect["log_loss"], 0)
+        wrong = probability_losses([{"label": 1, "score": 0}, {"label": 0, "score": 1}])
+        self.assertEqual(wrong["brier"], 1)
+        self.assertIsNone(wrong["log_loss"])
+        self.assertEqual(wrong["infinite_log_loss_rows"], 2)
