@@ -159,6 +159,39 @@
       }
     }
   },
+  "gate_diagnostics": {
+    "credential_request": {
+      "rows": 46,
+      "benign_labels": 4,
+      "positive_labels": 42,
+      "exclusive_rows": 19
+    },
+    "scope_violation": {
+      "rows": 56,
+      "benign_labels": 4,
+      "positive_labels": 52,
+      "exclusive_rows": 26
+    },
+    "hidden_instruction": {
+      "rows": 53,
+      "benign_labels": 5,
+      "positive_labels": 48,
+      "exclusive_rows": 22
+    },
+    "unapproved_network": {
+      "rows": 64,
+      "benign_labels": 18,
+      "positive_labels": 46,
+      "exclusive_rows": 36
+    }
+  },
+  "gate_count_histogram": {
+    "0": 244,
+    "1": 103,
+    "2": 43,
+    "3": 10,
+    "4": 0
+  },
   "ml_failure_count": 46,
   "first_12_ml_failures": [
     {

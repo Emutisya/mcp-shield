@@ -37,6 +37,12 @@ def evaluate(seed=17, include_predictions=False):
     training, heldout = split(dataset(seed))
     model = train(training)
     results = [(r, inspect(r["input"], model)) for r in heldout]
+    gate_diagnostics = {flag: {
+        "rows": sum(flag in p["gates"] for _, p in results),
+        "benign_labels": sum(flag in p["gates"] and r["label"] == 0 for r, p in results),
+        "positive_labels": sum(flag in p["gates"] and r["label"] == 1 for r, p in results),
+        "exclusive_rows": sum(p["gates"] == [flag] for _, p in results),
+    } for flag in FLAGS}
     failures = [{"id": r["id"], "label": r["label"], "decision": p["decision"],
                  "score": round(p["uncalibrated_ml_probability"], 12)}
                 for r, p in results if (p["uncalibrated_ml_probability"] >= 0.5) != bool(r["label"])]
@@ -75,6 +81,9 @@ def evaluate(seed=17, include_predictions=False):
             "classifier_policy_cross_tab": classifier_policy_cross_tab([
                 {"label": r["label"], "score": p["uncalibrated_ml_probability"], "decision": p["decision"]}
                 for r, p in results]),
+            "gate_diagnostics": gate_diagnostics,
+            "gate_count_histogram": {str(count): sum(len(p["gates"]) == count for _, p in results)
+                                     for count in range(len(FLAGS) + 1)},
             "ml_failure_count": len(failures), "first_12_ml_failures": failures[:12],
             "per_family": per_family,
             "threshold_sweep": threshold_sweep([{"label": r["label"], "score": p["uncalibrated_ml_probability"]}

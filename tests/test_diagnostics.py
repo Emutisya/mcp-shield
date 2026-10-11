@@ -73,3 +73,14 @@ class DiagnosticTests(unittest.TestCase):
         self.assertNotIn("predictions", evaluate())
         with self.assertRaises(ValueError):
             evaluate(include_predictions=1)
+
+    def test_gate_audit_retains_overlap_and_benign_triggered_rows(self):
+        from mcp_shield.evaluation import evaluate
+        report = evaluate()
+        histogram = report["gate_count_histogram"]
+        self.assertEqual(sum(histogram.values()), report["test_rows"])
+        self.assertEqual(sum(count for gates, count in histogram.items() if int(gates) > 0),
+                         report["policy_decisions"]["deny"])
+        self.assertEqual(sum(int(gates) * count for gates, count in histogram.items()),
+                         sum(g["rows"] for g in report["gate_diagnostics"].values()))
+        self.assertTrue(any(g["benign_labels"] for g in report["gate_diagnostics"].values()))

@@ -173,6 +173,9 @@ and distinct metadata with identical features is not treated as an exact repeat.
 against fixed remaining synthetic observations, preserving the input. Every
 nonempty combination denies independently of the model score; this is not live
 enforcement or a request to alter genuine observations.
+Evaluation audits each hard gate's synthetic label mix and exclusive triggers,
+plus a 0–4 gate-count histogram. Per-gate counts overlap deliberately; summing them
+does not give the number of denied observations or validated attacks.
 
 ### Run alongside the other projects
 
