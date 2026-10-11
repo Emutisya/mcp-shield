@@ -243,3 +243,12 @@ class OfflineTests(unittest.TestCase):
         self.assertEqual(report["duplicate_observations"]["unique_rows"], 2)
         self.assertEqual(report["duplicate_observations"]["groups"][0]["indexes"], [0, 2])
         self.assertEqual(report["decisions"]["allow"], 3)
+
+    def test_exhaustive_gate_profile_denies_every_nonempty_combination(self):
+        from mcp_shield.offline import gate_profile
+        original = copy.deepcopy(self.sample)
+        result = gate_profile(self.sample, {**self.model, "prior": 1e-300})
+        self.assertEqual(self.sample, original)
+        self.assertEqual(result["combinations"][0]["decision"], "allow")
+        self.assertEqual(len({tuple(r["gates"]) for r in result["combinations"]}), 16)
+        self.assertTrue(all(r["decision"] == "deny" for r in result["combinations"][1:]))

@@ -169,6 +169,10 @@ matrix. Explicit gates still deny under both models; no quality claim follows.
 Batch duplicate diagnostics expose canonical exact repeats and their indexes.
 They remain in decision totals; repeated observations are not independent evidence
 and distinct metadata with identical features is not treated as an exact repeat.
+`gates examples\catalog.json` demonstrates all sixteen hard-gate combinations
+against fixed remaining synthetic observations, preserving the input. Every
+nonempty combination denies independently of the model score; this is not live
+enforcement or a request to alter genuine observations.
 
 ### Run alongside the other projects
 

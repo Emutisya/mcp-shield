@@ -200,3 +200,16 @@ def replay_models(values, before, after):
     return {"warning": WARNING, "before_model_sha256": a["model_sha256"], "after_model_sha256": b["model_sha256"],
             "transitions": transitions, "rows": rows,
             "boundary": "Matched synthetic replay identifies changes, not which model is safer or better."}
+
+
+def gate_profile(value, model):
+    validate(value)
+    results = []
+    for mask in range(1 << len(FLAGS)):
+        hypothetical = copy.deepcopy(value)
+        hypothetical["signals"].update({flag: bool(mask & (1 << j)) for j, flag in enumerate(FLAGS)})
+        result = inspect(hypothetical, model)
+        results.append({"gates": result["gates"], "decision": result["decision"],
+                        "score": result["uncalibrated_ml_probability"]})
+    return {"warning": WARNING, "boundary": "Exhaustive synthetic gate combinations; not live enforcement.",
+            "combinations": results}

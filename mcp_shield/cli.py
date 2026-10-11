@@ -9,7 +9,7 @@ from .data import dataset, split
 from .evaluation import evaluate
 from .offline import compare_models, compare_observations, count_boundaries, inspect_batch, model_info, projection, read_document, receipt, representation_audit, sample_observations, sensitivity, validation_report
 from .server import MAX_BODY, make_server
-from .offline import replay_models
+from .offline import gate_profile, replay_models
 
 
 def write_output(path, text):
@@ -83,6 +83,9 @@ def main():
     replay.add_argument("input")
     replay.add_argument("--before", required=True)
     replay.add_argument("--after", required=True)
+    gates = sub.add_parser("gates", help="Simulate all sixteen hard-gate combinations")
+    gates.add_argument("input")
+    gates.add_argument("--model", default="models/baseline.model.json")
     s = sub.add_parser("serve", help="Serve local dashboard and real model inference")
     s.add_argument("--model", default="models/baseline.model.json")
     s.add_argument("--port", type=int, default=8765)
@@ -118,6 +121,8 @@ def main():
             value = json.loads(raw.decode("utf-8"), object_pairs_hook=unique_fields)
             operation = receipt if args.receipt else inspect
             print(json.dumps(operation(value, load_model(args.model)), indent=2))
+        elif args.command == "gates":
+            print(json.dumps(gate_profile(read_document(args.input, MAX_BODY), load_model(args.model)), indent=2))
         elif args.command == "replay":
             print(json.dumps(replay_models(read_document(args.input), load_model(args.before), load_model(args.after)), indent=2))
         elif args.command == "samples":
