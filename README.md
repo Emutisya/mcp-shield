@@ -82,6 +82,12 @@ installation. Models are locally generated in ignored `models\`.
 `train` and `evaluate` accept `--seed`; `serve` accepts `--port`.
 Missing or incompatible models produce a CLI error: run `train` first.
 
+`python -m mcp_shield batch observations.json --output reports\batch.json`
+inspects a JSON array of 1–100 synthetic observations. The entire bounded UTF-8
+document is validated before inference; invalid items identify their zero-based
+index, and no partial export is written. Results preserve input order and
+include advisory decision counts. This never connects to or executes tools.
+
 ### Run alongside the other projects
 
 Every project defaults to port 8765. To run all four at once, keep MCP Shield on
