@@ -273,6 +273,11 @@ their absence does not prove synthetic origin or independence.
 synthetic observation under up to ten separately seeded training models. It
 reports model identities, score range and verdict counts without choosing a model
 or majority-vote policy. Ranges are seed sensitivity, not uncertainty or calibration.
+`review-packet examples\catalog.json --output reports\review-packet.json` prepares
+an unsigned evidence receipt and observation-specific questions for a separate
+human review. Every packet remains **not_reviewed**. Denial offers no override,
+allow is not approval, and no reviewer identities, approval state or execution
+are collected or stored. Unknown observations must not be invented as false.
 
 ### Run alongside the other projects
 

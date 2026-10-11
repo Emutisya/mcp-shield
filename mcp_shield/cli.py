@@ -11,7 +11,7 @@ from .offline import compare_models, compare_observations, count_boundaries, ins
 from .server import MAX_BODY, make_server
 from .offline import check_model_identity, gate_profile, replay_models, training_manifest
 from .exports import batch_jsonlines, evaluation_text, inspection_text, predictions_csv
-from .offline import model_stability, read_jsonlines, reproduce_receipt
+from .offline import model_stability, prepare_review, read_jsonlines, reproduce_receipt
 
 
 def write_output(path, text):
@@ -117,6 +117,10 @@ def main():
     stability = sub.add_parser("model-stability", help="Measure fixed-observation sensitivity to synthetic training seeds")
     stability.add_argument("input")
     stability.add_argument("--seeds", nargs="+", type=int, required=True)
+    review = sub.add_parser("review-packet", help="Prepare synthetic evidence questions, never approve or execute")
+    review.add_argument("input")
+    review.add_argument("--model", default="models/baseline.model.json")
+    review.add_argument("--output")
     s = sub.add_parser("serve", help="Serve local dashboard and real model inference")
     s.add_argument("--model", default="models/baseline.model.json")
     s.add_argument("--port", type=int, default=8765)
@@ -128,7 +132,7 @@ def main():
             validate_outputs([], [args.output, args.manifest])
         elif args.command == "evaluate":
             validate_outputs([], [args.output, args.predictions])
-        elif args.command == "batch":
+        elif args.command in ("batch", "review-packet"):
             validate_outputs([args.input, args.model], [args.output])
         elif args.command == "inspect":
             validate_outputs([args.input, args.model], [args.output])
@@ -165,6 +169,11 @@ def main():
             if args.output:
                 write_output(args.output, report)
             print(report, end="")
+        elif args.command == "review-packet":
+            report = json.dumps(prepare_review(read_document(args.input, MAX_BODY), load_model(args.model)), indent=2) + "\n"
+            if args.output:
+                write_output(args.output, report)
+            print(report)
         elif args.command == "model-stability":
             print(json.dumps(model_stability(read_document(args.input, MAX_BODY), args.seeds), indent=2))
         elif args.command == "failures":

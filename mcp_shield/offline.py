@@ -296,3 +296,24 @@ def model_stability(value, seeds):
             "score_range": [min(scores), max(scores)],
             "decision_counts": {d: sum(r["result"]["decision"] == d for r in runs) for d in ("allow", "review", "deny")},
             "boundary": "Synthetic training-seed sensitivity, not uncertainty, calibration or a model selection/voting policy."}
+
+
+def prepare_review(value, model):
+    evidence = receipt(value, model)
+    result = evidence["result"]
+    questions = [
+        {"topic": "source", "question": "Which separate trusted process supplied these synthetic observations? This simulator does not verify them."},
+        {"topic": "window", "question": "What observation window and approved baseline do these counts represent? Unknown facts must not be invented as false."},
+        {"topic": "scope", "question": "What approved capabilities and destinations would a separately reviewed integration permit? This simulator executes nothing."},
+    ]
+    prompts = {
+        "ml_threshold": "Review the learned feature associations; this score is uncalibrated and is not a real attack probability.",
+        "metadata_drift": "Identify the approved metadata baseline and what changed in the caller's chosen window.",
+        "unexpected_calls": "Identify the expected call sequence and separately establish how the caller observed an anomaly.",
+        "unverified_publisher": "Establish publisher identity outside this simulator; a name or domain is not verification.",
+    }
+    questions.extend({"topic": trigger, "question": prompts[trigger]} for trigger in result["review_triggers"])
+    return {"warning": WARNING, "receipt": evidence, "review_status": "not_reviewed", "questions": questions,
+            "next_step": ("Stop: hard deny gates observed; this prototype has no override or approval path."
+                          if result["gates"] else "Independent human review is outside this prototype; allow does not establish safety."),
+            "boundary": "Preparation only. No approvals, reviewer identities, tool execution or enforcement are recorded."}

@@ -346,3 +346,15 @@ class OfflineTests(unittest.TestCase):
         self.assertNotIn("selected_model", report)
         with self.assertRaises(ValueError):
             model_stability(value, [17, 17])
+
+    def test_review_packet_is_unreviewed_and_never_overrides_denial(self):
+        from mcp_shield.offline import prepare_review
+        value = copy.deepcopy(self.sample)
+        value["signals"].update(scope_violation=True, metadata_changes=1, verified_publisher=False)
+        packet = prepare_review(value, self.model)
+        self.assertEqual(packet["review_status"], "not_reviewed")
+        self.assertEqual(packet["receipt"]["result"]["decision"], "deny")
+        self.assertIn("no override or approval path", packet["next_step"])
+        self.assertTrue({"metadata_drift", "unverified_publisher"} <= {q["topic"] for q in packet["questions"]})
+        self.assertNotIn("approved", packet)
+        self.assertIn("does not establish safety", prepare_review(self.sample, self.model)["next_step"])
