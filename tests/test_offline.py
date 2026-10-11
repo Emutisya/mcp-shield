@@ -311,3 +311,15 @@ class OfflineTests(unittest.TestCase):
         stored["observation_sha256"] = "0" * 64
         with self.assertRaises(ValueError):
             reproduce_receipt(stored, self.sample, self.model)
+
+    def test_schema_errors_identify_missing_paths_without_echoing_unknown_data(self):
+        from mcp_shield.core import validate
+        value = copy.deepcopy(self.sample)
+        value["signals"].pop("hidden_instruction")
+        value["signals"]["arbitrary_untrusted_field"] = True
+        with self.assertRaises(ValueError) as error:
+            validate(value)
+        self.assertIn("signals requires exactly", str(error.exception))
+        self.assertIn("Missing required fields: hidden_instruction", str(error.exception))
+        self.assertIn("Remove 1 unknown", str(error.exception))
+        self.assertNotIn("arbitrary_untrusted_field", str(error.exception))

@@ -25,13 +25,22 @@ def unique_fields(pairs):
     return result
 
 
+def exact_fields(value, required, path):
+    if not isinstance(value, dict):
+        raise ValueError(f"{path} must be an object containing exactly {', '.join(sorted(required))}.")
+    if set(value) != required:
+        missing = sorted(required - set(value))
+        unknown = len(set(value) - required)
+        detail = f" Missing required fields: {', '.join(missing)}." if missing else ""
+        detail += f" Remove {unknown} unknown field(s)." if unknown else ""
+        raise ValueError(f"{path} requires exactly {', '.join(sorted(required))}.{detail}")
+
+
 def validate(value):
-    if not isinstance(value, dict) or set(value) != {"server", "tool", "signals"}:
-        raise ValueError("Expected exactly server, tool, and signals objects.")
+    exact_fields(value, {"server", "tool", "signals"}, "observation")
     for key, fields in (("server", {"name", "publisher"}), ("tool", {"name", "description"})):
         item = value[key]
-        if not isinstance(item, dict) or set(item) != fields:
-            raise ValueError(f"{key} must contain exactly {', '.join(sorted(fields))}.")
+        exact_fields(item, fields, key)
         for field, text in item.items():
             limit = 2000 if field == "description" else 120
             if not isinstance(text, str) or not text.strip() or len(text) > limit:
@@ -40,8 +49,7 @@ def validate(value):
                    or 0xD800 <= ord(c) <= 0xDFFF for c in text):
                 raise ValueError(f"{key}.{field} contains unsupported control characters.")
     signals = value["signals"]
-    if not isinstance(signals, dict) or set(signals) != SIGNALS:
-        raise ValueError(f"signals must contain exactly {', '.join(sorted(SIGNALS))}.")
+    exact_fields(signals, SIGNALS, "signals")
     for key in (*FLAGS, "verified_publisher"):
         if type(signals[key]) is not bool:
             raise ValueError(f"signals.{key} must be a JSON boolean.")

@@ -226,6 +226,8 @@ LF and CRLF files are accepted; the normal JSON format retains aggregate diagnos
 checks reproduction of an unsigned receipt. Identities, policy decisions, keys
 and discrete evidence match exactly; floating values permit documented 1e-12
 relative/absolute libm tolerance. Reproduction is not source verification or safety.
+Schema recovery messages identify the failing object and missing required fields,
+and count unknown fields without echoing arbitrary untrusted keys or values.
 
 ### Run alongside the other projects
 
