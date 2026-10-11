@@ -157,3 +157,18 @@ class OfflineTests(unittest.TestCase):
         self.assertNotIn("decision", result)
         with self.assertRaises(ValueError):
             projection({})
+
+    def test_validation_reports_all_bad_items_without_inference(self):
+        from mcp_shield.offline import validation_report
+        with patch("mcp_shield.offline.inspect") as inference:
+            report = validation_report([{}, self.sample, None])
+            inference.assert_not_called()
+        self.assertEqual(report["valid_rows"], 1)
+        self.assertEqual([e["index"] for e in report["errors"]], [0, 2])
+        with patch("sys.argv", ["shield", "validate", "unused"]), patch("mcp_shield.cli.read_document", return_value=[{}]):
+            from contextlib import redirect_stdout
+            import io
+            from mcp_shield.cli import main
+            with redirect_stdout(io.StringIO()), self.assertRaises(SystemExit) as exit:
+                main()
+            self.assertEqual(exit.exception.code, 1)

@@ -124,3 +124,17 @@ def projection(value):
             "features": dict(zip(FEATURES, vector)),
             "excluded_fields": ["server.name", "server.publisher", "tool.name"],
             "language_cues": language_cues(value)}
+
+
+def validation_report(values):
+    if not isinstance(values, list) or not 1 <= len(values) <= MAX_BATCH:
+        raise ValueError(f"Validation requires 1 to {MAX_BATCH} observations.")
+    errors = []
+    for index, value in enumerate(values):
+        try:
+            validate(value)
+        except ValueError as exc:
+            errors.append({"index": index, "error": str(exc)})
+    return {"warning": WARNING, "rows": len(values), "valid_rows": len(values) - len(errors),
+            "invalid_rows": len(errors), "errors": errors,
+            "boundary": "Schema validity is not safety, source verification or an inspection verdict."}

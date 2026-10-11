@@ -138,6 +138,9 @@ Substrings such as “tokenization” do not match “token”; innocent descrip
 can match, and missing matches do not establish safety or multilingual coverage.
 `project examples\catalog.json` validates and shows the ten-feature representation
 and excluded metadata without loading a model. It issues no advisory verdict.
+`validate observations.json` reports every invalid item in a bounded batch,
+without inference or model loading. Exit status 1 means invalid observations,
+2 means command/document failure, 0 means schema-valid only, never “safe”.
 
 ### Run alongside the other projects
 
