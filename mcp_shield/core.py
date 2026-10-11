@@ -123,6 +123,15 @@ def inspect(value, model):
                              "log_odds_contribution": round(contribution, 4)}))
     probability = 1 / (1 + math.exp(-max(-700, min(700, log_odds))))
     gates = [key for key in FLAGS if value["signals"][key]]
+    review_triggers = []
+    if probability >= .65:
+        review_triggers.append("ml_threshold")
+    if value["signals"]["metadata_changes"]:
+        review_triggers.append("metadata_drift")
+    if value["signals"]["unexpected_calls"]:
+        review_triggers.append("unexpected_calls")
+    if not value["signals"]["verified_publisher"]:
+        review_triggers.append("unverified_publisher")
     reasons = [f"Hard deny gate: {key}." for key in gates]
     if gates:
         decision = "deny"
@@ -140,5 +149,6 @@ def inspect(value, model):
         reasons.append("No observed policy gate fired; this is not a safety guarantee.")
     return {"decision": decision, "uncalibrated_ml_probability": probability,
             "reasons": reasons, "gates": gates,
+            "review_triggers": review_triggers,
             "contributions": [row for _, row in sorted(explanations, key=lambda item: abs(item[0]), reverse=True)],
             "warning": "Synthetic-trained offline simulator. Caller-supplied signals are not independently verified."}

@@ -123,3 +123,12 @@ class OfflineTests(unittest.TestCase):
         sizes = groups["response_bytes"]
         self.assertEqual(sizes[1]["result"], sizes[2]["result"])
         self.assertNotEqual(sizes[2]["result"], sizes[3]["result"])
+
+    def test_policy_trace_exposes_all_triggers_even_under_denial(self):
+        value = copy.deepcopy(self.sample)
+        value["signals"].update(scope_violation=True, metadata_changes=1, unexpected_calls=1,
+                                verified_publisher=False)
+        result = inspect(value, {**self.model, "prior": .999999})
+        self.assertEqual(result["decision"], "deny")
+        self.assertEqual(result["review_triggers"],
+                         ["ml_threshold", "metadata_drift", "unexpected_calls", "unverified_publisher"])

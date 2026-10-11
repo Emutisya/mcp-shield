@@ -128,6 +128,8 @@ instructions or permission to falsify genuine observations.
 call-anomaly and response-size cutoffs. In particular one unexpected call triggers
 review even though the learned call feature changes only above two. Values are
 not rates, forecasts, or advice to suppress actual events.
+Inspection includes every `review_triggers` entry, even when a hard gate denies
+or an earlier reason takes precedence. Deny still overrides all review triggers.
 
 ### Run alongside the other projects
 
