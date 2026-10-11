@@ -123,3 +123,26 @@ def evaluate_seeds(seeds):
                                                max(r["ml"]["accuracy"] for r in reports)],
             "limitations": ["Seeds are not independent real-world datasets or confidence intervals.",
                             "No seed, model or threshold is selected using these results."]}
+
+
+def compare_reports(before, after):
+    for report in (before, after):
+        if not isinstance(report, dict) or type(report.get("test_rows")) is not int or report["test_rows"] <= 0:
+            raise ValueError("Comparison requires evaluation reports with positive test_rows.")
+        for key in ("training_sha256", "heldout_sha256"):
+            digest = report.get(key)
+            if not isinstance(digest, str) or len(digest) != 64 or any(c not in "0123456789abcdef" for c in digest):
+                raise ValueError("Evaluation content identities must be lowercase SHA-256 hex.")
+        for method in ("ml", "policy_nonallow_as_positive"):
+            counts = report.get(method)
+            if (not isinstance(counts, dict) or any(type(counts.get(k)) is not int or counts[k] < 0 for k in ("tp", "fp", "tn", "fn"))
+                    or sum(counts[k] for k in ("tp", "fp", "tn", "fn")) != report["test_rows"]):
+                raise ValueError("Evaluation confusion counts must reconcile with test_rows.")
+    for key in ("heldout_sha256", "test_rows", "ml_threshold", "test_families"):
+        if key not in before or key not in after or before[key] != after[key]:
+            raise ValueError(f"Matched report comparison requires identical {key}.")
+    return {"data": "Matched synthetic report deltas only, not real-world improvement.",
+            "heldout_sha256": before["heldout_sha256"],
+            "before_training_sha256": before["training_sha256"], "after_training_sha256": after["training_sha256"],
+            "count_deltas": {method: {key: after[method][key] - before[method][key] for key in ("tp", "fp", "tn", "fn")}
+                             for method in ("ml", "policy_nonallow_as_positive")}}

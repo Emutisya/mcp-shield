@@ -146,3 +146,17 @@ class DiagnosticTests(unittest.TestCase):
         for seeds in ([], [17, 17], [True], list(range(11))):
             with self.assertRaises(ValueError):
                 evaluate_seeds(seeds)
+
+    def test_report_comparison_rejects_unmatched_data_and_inconsistent_counts(self):
+        import copy
+        from mcp_shield.evaluation import compare_reports, evaluate
+        a = evaluate()
+        b = copy.deepcopy(a)
+        b["ml"]["tp"] += 1
+        b["ml"]["fn"] -= 1
+        self.assertEqual(compare_reports(a, b)["count_deltas"]["ml"]["fn"], -1)
+        with self.assertRaisesRegex(ValueError, "identical heldout"):
+            compare_reports(a, evaluate(18))
+        b["ml"]["tp"] += 1
+        with self.assertRaisesRegex(ValueError, "reconcile"):
+            compare_reports(a, b)

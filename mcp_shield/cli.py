@@ -6,7 +6,7 @@ from pathlib import Path
 
 from .core import inspect, load_model, train, unique_fields
 from .data import dataset, split
-from .evaluation import evaluate, evaluate_seeds
+from .evaluation import compare_reports, evaluate, evaluate_seeds
 from .offline import compare_models, compare_observations, count_boundaries, inspect_batch, model_info, projection, read_document, receipt, representation_audit, sample_observations, sensitivity, validation_report
 from .server import MAX_BODY, make_server
 from .offline import gate_profile, replay_models
@@ -89,6 +89,9 @@ def main():
     seeds = sub.add_parser("evaluate-seeds", help="Repeat fixed synthetic experiments without selecting a model")
     seeds.add_argument("--seeds", nargs="+", type=int, required=True)
     seeds.add_argument("--output")
+    reports = sub.add_parser("compare-reports", help="Compare only matched held-out synthetic reports")
+    reports.add_argument("before")
+    reports.add_argument("after")
     s = sub.add_parser("serve", help="Serve local dashboard and real model inference")
     s.add_argument("--model", default="models/baseline.model.json")
     s.add_argument("--port", type=int, default=8765)
@@ -124,6 +127,8 @@ def main():
             value = json.loads(raw.decode("utf-8"), object_pairs_hook=unique_fields)
             operation = receipt if args.receipt else inspect
             print(json.dumps(operation(value, load_model(args.model)), indent=2))
+        elif args.command == "compare-reports":
+            print(json.dumps(compare_reports(read_document(args.before), read_document(args.after)), indent=2))
         elif args.command == "evaluate-seeds":
             report = json.dumps(evaluate_seeds(args.seeds), indent=2) + "\n"
             if args.output:

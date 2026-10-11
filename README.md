@@ -196,6 +196,10 @@ These descriptive losses do not establish calibration or real-world safety.
 `evaluate-seeds --seeds 17 18 19 --output reports\seed-runs.json` repeats up to ten
 distinct fixed-family synthetic experiments, preserving per-run hashes and
 metrics. Ranges are not confidence intervals; no winning seed/model is selected.
+`compare-reports before.json after.json` requires matching held-out content hash,
+sample count, families and ML threshold, and validates confusion count totals.
+It reports matched count deltas, refusing unlike synthetic experiments rather
+than presenting misleading improvement claims.
 
 ### Run alongside the other projects
 
