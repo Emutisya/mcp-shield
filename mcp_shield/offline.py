@@ -101,3 +101,18 @@ def sensitivity(value, model):
                          "probability_delta": result["uncalibrated_ml_probability"] - baseline["uncalibrated_ml_probability"]})
     return {"warning": WARNING, "boundary": "One-variable synthetic sensitivity; not causal evidence or remediation advice. Never falsify observed signals.",
             "baseline": baseline, "variants": variants}
+
+
+def count_boundaries(value, model):
+    baseline = inspect(value, model)
+    candidates = {"metadata_changes": (0, 1, 20), "unexpected_calls": (0, 1, 2, 3, 100),
+                  "response_bytes": (0, 65535, 65536, 65537, 1000000)}
+    groups = {}
+    for signal, counts in candidates.items():
+        groups[signal] = []
+        for count in counts:
+            hypothetical = copy.deepcopy(value)
+            hypothetical["signals"][signal] = count
+            groups[signal].append({"hypothetical_value": count, "result": inspect(hypothetical, model)})
+    return {"warning": WARNING, "boundary": "Numeric boundary simulations only; not rate estimates or remediation advice.",
+            "baseline": baseline, "groups": groups}

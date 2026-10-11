@@ -124,6 +124,10 @@ This is a simulation comparison, not advice to suppress genuine observations.
 one at a time, preserving the original. Every variant still runs explicit gates.
 These are synthetic sensitivity examples, not causal explanations, remediation
 instructions or permission to falsify genuine observations.
+`boundaries examples\catalog.json` simulates bounded count values around drift,
+call-anomaly and response-size cutoffs. In particular one unexpected call triggers
+review even though the learned call feature changes only above two. Values are
+not rates, forecasts, or advice to suppress actual events.
 
 ### Run alongside the other projects
 

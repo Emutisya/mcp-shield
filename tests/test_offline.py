@@ -110,3 +110,16 @@ class OfflineTests(unittest.TestCase):
         self.assertEqual(len(result["variants"]), 5)
         self.assertTrue(all(v["result"]["decision"] == "deny" for v in result["variants"][:4]))
         self.assertEqual(result["variants"][-1]["result"]["decision"], "review")
+
+    def test_count_boundaries_distinguish_policy_and_model_thresholds(self):
+        from mcp_shield.offline import count_boundaries
+        groups = count_boundaries(self.sample, self.model)["groups"]
+        calls = groups["unexpected_calls"]
+        self.assertEqual(calls[1]["result"]["decision"], "review")
+        self.assertEqual(calls[1]["result"]["uncalibrated_ml_probability"],
+                         calls[2]["result"]["uncalibrated_ml_probability"])
+        self.assertNotEqual(calls[2]["result"]["uncalibrated_ml_probability"],
+                            calls[3]["result"]["uncalibrated_ml_probability"])
+        sizes = groups["response_bytes"]
+        self.assertEqual(sizes[1]["result"], sizes[2]["result"])
+        self.assertNotEqual(sizes[2]["result"], sizes[3]["result"])
