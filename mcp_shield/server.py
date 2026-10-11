@@ -23,6 +23,16 @@ def make_server(model, port=8765):
     validate_model(model)
 
     class Handler(BaseHTTPRequestHandler):
+        def setup(self):
+            super().setup()
+            self.connection.settimeout(5)
+
+        def handle_one_request(self):
+            try:
+                super().handle_one_request()
+            except ConnectionError:
+                self.close_connection = True
+
         def log_message(self, format, *args):
             pass  # Avoid logging user-supplied metadata.
 

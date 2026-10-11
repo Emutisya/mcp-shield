@@ -1,4 +1,6 @@
 import copy
+from contextlib import redirect_stderr
+import io
 import http.client
 import json
 import math
@@ -8,6 +10,7 @@ import threading
 import socket
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 from mcp_shield.core import FLAGS, features, inspect, train, validate, validate_model
@@ -194,6 +197,12 @@ class ShieldTests(unittest.TestCase):
             self.assertEqual(status, 200)
             self.assertIn(b"clawpilotTheme", body)
             self.assertIn("frame-ancestors 'none'", csp)
+            self.assertEqual(request("GET", "/health")[0], 200)
+            logs = io.StringIO()
+            with redirect_stderr(logs), patch.object(server.RequestHandlerClass, "respond", side_effect=ConnectionResetError("client closed")):
+                with self.assertRaises(http.client.RemoteDisconnected):
+                    request("GET", "/health")
+            self.assertEqual(logs.getvalue(), "")
             self.assertEqual(request("GET", "/health")[0], 200)
             headers = {"Content-Type": "application/json"}
             duplicated = json.dumps(self.sample).replace('"verified_publisher": true', '"verified_publisher": false, "verified_publisher": true')
