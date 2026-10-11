@@ -14,11 +14,32 @@ MAX_DOCUMENT = 2 * 1024 * 1024
 
 
 def read_document(path, maximum=MAX_DOCUMENT):
+    return json.loads(read_bytes(path, maximum).decode("utf-8"), object_pairs_hook=unique_fields)
+
+
+def read_bytes(path, maximum=MAX_DOCUMENT):
     with Path(path).open("rb") as source:
         raw = source.read(maximum + 1)
     if not 0 < len(raw) <= maximum:
         raise ValueError(f"JSON document must be 1 to {maximum} bytes.")
-    return json.loads(raw.decode("utf-8"), object_pairs_hook=unique_fields)
+    return raw
+
+
+def read_jsonlines(path):
+    lines = read_bytes(path).split(b"\n")
+    if lines[-1] == b"":
+        lines.pop()
+    if not 1 <= len(lines) <= MAX_BATCH:
+        raise ValueError(f"JSON Lines requires 1–{MAX_BATCH} records.")
+    values = []
+    for index, line in enumerate(lines):
+        if not 0 < len(line) <= 16384:
+            raise ValueError(f"JSON Lines record {index} must be 1–16384 bytes.")
+        try:
+            values.append(json.loads(line.decode("utf-8"), object_pairs_hook=unique_fields))
+        except (ValueError, UnicodeError, RecursionError) as exc:
+            raise ValueError(f"JSON Lines record {index}: invalid UTF-8 JSON or duplicate fields.") from exc
+    return values
 
 
 def inspect_batch(values, model):

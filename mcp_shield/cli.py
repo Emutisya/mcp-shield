@@ -10,7 +10,8 @@ from .evaluation import compare_reports, evaluate, evaluate_seeds
 from .offline import compare_models, compare_observations, count_boundaries, inspect_batch, model_info, projection, read_document, receipt, representation_audit, sample_observations, sensitivity, validation_report
 from .server import MAX_BODY, make_server
 from .offline import check_model_identity, gate_profile, replay_models, training_manifest
-from .exports import evaluation_text, inspection_text, predictions_csv
+from .exports import batch_jsonlines, evaluation_text, inspection_text, predictions_csv
+from .offline import read_jsonlines
 
 
 def write_output(path, text):
@@ -60,6 +61,8 @@ def main():
     b.add_argument("input", help="JSON array of complete observation objects")
     b.add_argument("--model", default="models/baseline.model.json")
     b.add_argument("--output")
+    b.add_argument("--input-format", choices=("json", "jsonl"), default="json")
+    b.add_argument("--format", choices=("json", "jsonl"), default="json")
     info = sub.add_parser("model-info", help="Describe local learned parameters, not safety or authenticity")
     info.add_argument("--model", default="models/baseline.model.json")
     comparison = sub.add_parser("compare-models", help="Compare two validated local model artifacts")
@@ -187,7 +190,9 @@ def main():
         elif args.command == "model-info":
             print(json.dumps(model_info(load_model(args.model)), indent=2))
         elif args.command == "batch":
-            report = json.dumps(inspect_batch(read_document(args.input), load_model(args.model)), indent=2) + "\n"
+            values = read_jsonlines(args.input) if args.input_format == "jsonl" else read_document(args.input)
+            result = inspect_batch(values, load_model(args.model))
+            report = batch_jsonlines(result) if args.format == "jsonl" else json.dumps(result, indent=2) + "\n"
             if args.output:
                 write_output(args.output, report)
             print(report)

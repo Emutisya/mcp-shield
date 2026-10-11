@@ -2,6 +2,7 @@
 
 import csv
 import io
+import json
 
 
 def inspection_text(result):
@@ -48,3 +49,10 @@ def evaluation_text(report):
     lines.extend(f"  {family}: {group['ml']['fp']} / {group['ml']['fn']}" for family, group in report["per_family"].items())
     lines.extend(report["limitations"])
     return "\n".join(lines) + "\n"
+
+
+def batch_jsonlines(report):
+    return "".join(json.dumps({"index": index, "warning": report["warning"],
+                               "model_sha256": report["model_sha256"],
+                               "observation_sha256": report["observation_sha256"][index], "result": result})
+                   + "\n" for index, result in enumerate(report["results"]))

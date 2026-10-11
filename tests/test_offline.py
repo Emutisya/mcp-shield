@@ -284,3 +284,17 @@ class OfflineTests(unittest.TestCase):
         for invalid in ("", "x" * 64, digest.upper(), None):
             with self.assertRaises(ValueError):
                 check_model_identity(self.model, invalid)
+
+    def test_jsonlines_input_and_evidence_output_preserve_record_order(self):
+        import io
+        from mcp_shield.offline import read_jsonlines
+        from mcp_shield.exports import batch_jsonlines
+        body = (json.dumps(self.sample) + "\r\n" + json.dumps(self.sample) + "\n").encode()
+        with patch.object(Path, "open", return_value=io.BytesIO(body)):
+            values = read_jsonlines("unused")
+        rows = [json.loads(line) for line in batch_jsonlines(inspect_batch(values, self.model)).splitlines()]
+        self.assertEqual([r["index"] for r in rows], [0, 1])
+        self.assertEqual(rows[0]["result"], inspect(self.sample, self.model))
+        for raw in (b"{}\n\n{}\n", b'{}\n{"x":1,"x":2}', b"{}\n\xff", b" " * 16385):
+            with patch.object(Path, "open", return_value=io.BytesIO(raw)), self.assertRaises(ValueError):
+                read_jsonlines("unused")

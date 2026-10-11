@@ -218,6 +218,10 @@ unsigned synthetic provenance; model and manifest writes are independently atomi
 `check-model --sha256 <expected-content-hash>` validates the local model and
 requires exact canonical content identity, without inference. A caller-provided
 unsigned hash is not publisher authentication, independent verification or safety.
+`batch observations.jsonl --input-format jsonl --format jsonl` accepts 1–100
+bounded UTF-8 JSON Lines records and emits one indexed evidence receipt per line.
+Internal blank/malformed records fail the entire batch before inference/export.
+LF and CRLF files are accepted; the normal JSON format retains aggregate diagnostics.
 
 ### Run alongside the other projects
 
