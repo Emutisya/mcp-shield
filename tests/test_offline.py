@@ -298,3 +298,16 @@ class OfflineTests(unittest.TestCase):
         for raw in (b"{}\n\n{}\n", b'{}\n{"x":1,"x":2}', b"{}\n\xff", b" " * 16385):
             with patch.object(Path, "open", return_value=io.BytesIO(raw)), self.assertRaises(ValueError):
                 read_jsonlines("unused")
+
+    def test_receipt_reproduction_tolerates_libm_not_changed_policy_or_content(self):
+        from mcp_shield.offline import receipt, reproduce_receipt
+        stored = receipt(self.sample, self.model)
+        stored["result"]["uncalibrated_ml_probability"] += 1e-15
+        self.assertTrue(reproduce_receipt(stored, self.sample, self.model)["reproduced"])
+        stored["result"]["decision"] = "deny"
+        with self.assertRaises(ValueError):
+            reproduce_receipt(stored, self.sample, self.model)
+        stored = receipt(self.sample, self.model)
+        stored["observation_sha256"] = "0" * 64
+        with self.assertRaises(ValueError):
+            reproduce_receipt(stored, self.sample, self.model)

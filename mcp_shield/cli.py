@@ -11,7 +11,7 @@ from .offline import compare_models, compare_observations, count_boundaries, ins
 from .server import MAX_BODY, make_server
 from .offline import check_model_identity, gate_profile, replay_models, training_manifest
 from .exports import batch_jsonlines, evaluation_text, inspection_text, predictions_csv
-from .offline import read_jsonlines
+from .offline import read_jsonlines, reproduce_receipt
 
 
 def write_output(path, text):
@@ -104,6 +104,10 @@ def main():
     identity = sub.add_parser("check-model", help="Match a caller-provided content hash; not authentication")
     identity.add_argument("--model", default="models/baseline.model.json")
     identity.add_argument("--sha256", required=True)
+    reproduction = sub.add_parser("reproduce", help="Reproduce an unsigned receipt from matching local inputs")
+    reproduction.add_argument("receipt")
+    reproduction.add_argument("input")
+    reproduction.add_argument("--model", default="models/baseline.model.json")
     s = sub.add_parser("serve", help="Serve local dashboard and real model inference")
     s.add_argument("--model", default="models/baseline.model.json")
     s.add_argument("--port", type=int, default=8765)
@@ -152,6 +156,8 @@ def main():
             if args.output:
                 write_output(args.output, report)
             print(report, end="")
+        elif args.command == "reproduce":
+            print(json.dumps(reproduce_receipt(read_document(args.receipt), read_document(args.input, MAX_BODY), load_model(args.model)), indent=2))
         elif args.command == "check-model":
             print(json.dumps(check_model_identity(load_model(args.model), args.sha256), indent=2))
         elif args.command == "compare-reports":

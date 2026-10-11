@@ -222,6 +222,10 @@ unsigned hash is not publisher authentication, independent verification or safet
 bounded UTF-8 JSON Lines records and emits one indexed evidence receipt per line.
 Internal blank/malformed records fail the entire batch before inference/export.
 LF and CRLF files are accepted; the normal JSON format retains aggregate diagnostics.
+`reproduce receipt.json examples\catalog.json --model models\baseline.model.json`
+checks reproduction of an unsigned receipt. Identities, policy decisions, keys
+and discrete evidence match exactly; floating values permit documented 1e-12
+relative/absolute libm tolerance. Reproduction is not source verification or safety.
 
 ### Run alongside the other projects
 

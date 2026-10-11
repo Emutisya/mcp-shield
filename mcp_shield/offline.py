@@ -260,3 +260,23 @@ def check_model_identity(model, expected):
         raise ValueError("Model content identity does not match the expected SHA-256. No inference was performed.")
     return {"warning": WARNING, "model_sha256": actual, "content_match": True,
             "boundary": "Matching a caller-provided unsigned hash does not authenticate a source or establish model safety."}
+
+
+def reproduce_receipt(stored, value, model):
+    expected = receipt(value, model)
+
+    def equal(left, right):
+        if isinstance(right, float):
+            return type(left) in (float, int) and math.isfinite(left) and math.isclose(left, right, rel_tol=1e-12, abs_tol=1e-12)
+        if isinstance(right, dict):
+            return isinstance(left, dict) and set(left) == set(right) and all(equal(left[k], right[k]) for k in right)
+        if isinstance(right, list):
+            return isinstance(left, list) and len(left) == len(right) and all(equal(a, b) for a, b in zip(left, right))
+        return type(left) is type(right) and left == right
+
+    if not equal(stored, expected):
+        raise ValueError("Receipt does not reproduce from the supplied observation and model.")
+    return {"warning": WARNING, "reproduced": True, "model_sha256": expected["model_sha256"],
+            "observation_sha256": expected["observation_sha256"],
+            "numeric_tolerance": {"relative": 1e-12, "absolute": 1e-12},
+            "boundary": "Reproduction checks unsigned content, not source authenticity or safety. Policy verdicts and identities match exactly."}
