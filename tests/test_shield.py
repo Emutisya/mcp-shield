@@ -141,6 +141,9 @@ class ShieldTests(unittest.TestCase):
             self.assertIn("frame-ancestors 'none'", csp)
             self.assertEqual(request("GET", "/health")[0], 200)
             headers = {"Content-Type": "application/json"}
+            duplicated = json.dumps(self.sample).replace('"verified_publisher": true', '"verified_publisher": false, "verified_publisher": true')
+            self.assertEqual(request("POST", "/api/inspect", duplicated, headers)[0], 400)
+            self.assertEqual(request("POST", "/api/inspect", "{}", {**headers, "Content-Length": "+2"})[0], 400)
             status, body, _ = request("POST", "/api/inspect", json.dumps(self.sample), headers)
             self.assertEqual(status, 200)
             self.assertEqual(json.loads(body), inspect(self.sample, self.model))

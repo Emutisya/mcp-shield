@@ -10,6 +10,15 @@ from .core import inspect, validate_model
 MAX_BODY = 16384
 
 
+def unique_fields(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("Duplicate JSON fields are not accepted.")
+        result[key] = value
+    return result
+
+
 def make_server(model, port=8765):
     validate_model(model)
 
@@ -62,7 +71,9 @@ def make_server(model, port=8765):
                 return
             try:
                 raw_length = self.headers.get("Content-Length", "")
-                if not raw_length.isascii() or not raw_length.isdigit() or self.headers.get("Transfer-Encoding"):
+                if (len(self.headers.get_all("Content-Length", [])) != 1
+                        or not raw_length.isascii() or not raw_length.isdigit()
+                        or self.headers.get("Transfer-Encoding") is not None):
                     raise ValueError("A valid Content-Length is required; chunked bodies are unsupported.")
                 length = int(raw_length)
                 if not 0 < length <= MAX_BODY:
@@ -71,9 +82,12 @@ def make_server(model, port=8765):
                 body = self.rfile.read(length)
                 if len(body) != length:
                     raise ValueError("Incomplete request body.")
-                result = inspect(json.loads(body.decode("utf-8")), model)
-            except (ValueError, UnicodeError, TimeoutError, RecursionError) as exc:
+                result = inspect(json.loads(body.decode("utf-8"), object_pairs_hook=unique_fields), model)
+            except (ValueError, UnicodeError, RecursionError) as exc:
                 self.respond(400, json.dumps({"error": str(exc)}))
+                return
+            except TimeoutError:
+                self.respond(408, '{"error":"Request body timed out. Send a complete JSON request."}')
                 return
             self.respond(200, json.dumps(result))
 
