@@ -198,7 +198,8 @@ class OfflineTests(unittest.TestCase):
     def test_representation_audit_detects_mixed_labels_and_overlap(self):
         from mcp_shield.offline import representation_audit
         rows = [{"id": str(i), "family": "a" if i < 2 else "b", "split": "train" if i < 2 else "test",
-                 "input": self.sample, "label": i % 2} for i in range(4)]
+                 "input": {**self.sample, "server": {**self.sample["server"], "name": f"Fictional-{i}"}},
+                 "label": i % 2} for i in range(4)]
         result = representation_audit(rows)
         self.assertEqual(result["shared_feature_vectors"], 1)
         self.assertEqual(result["training_mixed_label_vectors"], 1)
@@ -371,3 +372,16 @@ class OfflineTests(unittest.TestCase):
         self.assertEqual(report["scenarios"][1]["result"]["decision"], "review")
         with self.assertRaises(ValueError):
             compare_scenarios([self.sample] * 26, self.model)
+
+    def test_split_rejects_exact_source_leakage_but_keeps_feature_overlap(self):
+        from mcp_shield.core import features
+        rows = dataset()
+        rows[-1]["input"] = copy.deepcopy(rows[0]["input"])
+        with self.assertRaisesRegex(ValueError, "source-distinct"):
+            split(rows)
+        rows[-1]["input"]["server"]["name"] = "Different fictional source"
+        training, heldout = split(rows)
+        self.assertEqual(features(training[0]["input"]), features(heldout[-1]["input"]))
+        rows[-1]["label"] = True
+        with self.assertRaisesRegex(ValueError, "binary integer"):
+            split(rows)

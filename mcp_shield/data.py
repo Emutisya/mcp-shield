@@ -1,6 +1,8 @@
 """Generated toy data: disjoint language families, never exploit strings."""
 
 import random
+import json
+from .core import validate
 
 FAMILIES = (
     ("ledger", "Summarize accounting entries", "Inspect private ledger notes"),
@@ -63,4 +65,12 @@ def split(rows):
         raise ValueError("Both training and held-out examples are required.")
     if {r["family"] for r in train_rows} & {r["family"] for r in test_rows}:
         raise ValueError("Training and held-out families must be disjoint.")
+    for row in rows:
+        if type(row.get("label")) is not int or row["label"] not in (0, 1) or "input" not in row:
+            raise ValueError("Split rows require complete observations and binary integer labels.")
+        validate(row["input"])
+    def sources(partition):
+        return {json.dumps(r["input"], sort_keys=True, separators=(",", ":"), ensure_ascii=True) for r in partition}
+    if sources(train_rows) & sources(test_rows):
+        raise ValueError("Training and held-out observations must be source-distinct; binary feature overlap is allowed.")
     return train_rows, test_rows

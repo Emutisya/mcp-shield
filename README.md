@@ -282,6 +282,10 @@ are collected or stored. Unknown observations must not be invented as false.
 hypothetical observations against a shared first baseline. Every candidate retains
 its independent gate verdict, feature delta and unsigned identity. Comparisons
 are not sequential remediation, and genuine observations must never be falsified.
+Split validation rejects exact canonical observation copies across training and
+held-out partitions even if their IDs/families differ, and validates all source
+schemas and labels. Distinct observations with shared binary feature vectors remain
+allowed; source-disjointness is not independent telemetry verification.
 
 ### Run alongside the other projects
 
