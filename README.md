@@ -245,6 +245,9 @@ introspection as `model-info`, not authentication or verified provenance.
 Duplicate Host/Origin/Content-Type headers are rejected instead of selecting an
 ambiguous first value. Existing strict Content-Length and no-chunked-body rules
 still apply, and a rejected request does not disable subsequent local requests.
+HEAD follows GET routes with correct headers and no body. Unsupported methods
+receive JSON 405 recovery messages and an Allow header instead of a generic HTML
+501 response; HTTP parser failures also use bounded JSON status descriptions.
 
 ### Run alongside the other projects
 

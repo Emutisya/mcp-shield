@@ -31,6 +31,12 @@ def make_server(model, port=8765):
         def log_message(self, format, *args):
             pass  # Avoid logging user-supplied metadata.
 
+        def send_error(self, code, message=None, explain=None):
+            if code == 501:
+                self.respond(405, '{"error":"Unsupported method. Use GET, HEAD or POST on a documented route."}')
+            else:
+                self.respond(code, json.dumps({"error": self.responses.get(code, ("Invalid HTTP request",))[0]}))
+
         def respond(self, status, body, mime="application/json"):
             data = body.encode("utf-8")
             self.send_response(status)
@@ -38,9 +44,12 @@ def make_server(model, port=8765):
             self.send_header("Content-Length", str(len(data)))
             self.send_header("X-Content-Type-Options", "nosniff")
             self.send_header("Cache-Control", "no-store")
+            if status == 405:
+                self.send_header("Allow", "GET, HEAD, POST")
             self.send_header("Content-Security-Policy", "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'")
             self.end_headers()
-            self.wfile.write(data)
+            if self.command != "HEAD":
+                self.wfile.write(data)
 
         def authorized(self):
             expected = f"127.0.0.1:{self.server.server_port}"
@@ -99,5 +108,7 @@ def make_server(model, port=8765):
                 self.respond(408, '{"error":"Request body timed out. Send a complete JSON request."}')
                 return
             self.respond(200, json.dumps(result))
+
+        do_HEAD = do_GET
 
     return ThreadingHTTPServer(("127.0.0.1", port), Handler)
