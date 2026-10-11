@@ -176,3 +176,16 @@ def sample_observations(family, count=10, seed=17):
     if type(count) is not int or not 1 <= count <= MAX_BATCH:
         raise ValueError(f"Sample count must be 1 to {MAX_BATCH}.")
     return [row["input"] for row in dataset(seed, count) if row["family"] == family]
+
+
+def replay_models(values, before, after):
+    a, b = inspect_batch(values, before), inspect_batch(values, after)
+    transitions = {left: {right: 0 for right in ("allow", "review", "deny")} for left in ("allow", "review", "deny")}
+    rows = []
+    for index, (left, right) in enumerate(zip(a["results"], b["results"])):
+        transitions[left["decision"]][right["decision"]] += 1
+        rows.append({"index": index, "before": left["decision"], "after": right["decision"],
+                     "before_score": left["uncalibrated_ml_probability"], "after_score": right["uncalibrated_ml_probability"]})
+    return {"warning": WARNING, "before_model_sha256": a["model_sha256"], "after_model_sha256": b["model_sha256"],
+            "transitions": transitions, "rows": rows,
+            "boundary": "Matched synthetic replay identifies changes, not which model is safer or better."}

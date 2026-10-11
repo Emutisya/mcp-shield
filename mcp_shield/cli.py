@@ -9,6 +9,7 @@ from .data import dataset, split
 from .evaluation import evaluate
 from .offline import compare_models, compare_observations, count_boundaries, inspect_batch, model_info, projection, read_document, receipt, representation_audit, sample_observations, sensitivity, validation_report
 from .server import MAX_BODY, make_server
+from .offline import replay_models
 
 
 def write_output(path, text):
@@ -78,6 +79,10 @@ def main():
     samples.add_argument("--count", type=int, default=10)
     samples.add_argument("--seed", type=int, default=17)
     samples.add_argument("--output")
+    replay = sub.add_parser("replay", help="Compare model verdicts on the same bounded synthetic batch")
+    replay.add_argument("input")
+    replay.add_argument("--before", required=True)
+    replay.add_argument("--after", required=True)
     s = sub.add_parser("serve", help="Serve local dashboard and real model inference")
     s.add_argument("--model", default="models/baseline.model.json")
     s.add_argument("--port", type=int, default=8765)
@@ -113,6 +118,8 @@ def main():
             value = json.loads(raw.decode("utf-8"), object_pairs_hook=unique_fields)
             operation = receipt if args.receipt else inspect
             print(json.dumps(operation(value, load_model(args.model)), indent=2))
+        elif args.command == "replay":
+            print(json.dumps(replay_models(read_document(args.input), load_model(args.before), load_model(args.after)), indent=2))
         elif args.command == "samples":
             report = json.dumps(sample_observations(args.family, args.count, args.seed), indent=2) + "\n"
             if args.output:

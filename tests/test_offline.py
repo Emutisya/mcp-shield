@@ -226,3 +226,12 @@ class OfflineTests(unittest.TestCase):
                 main()
             self.assertEqual(exit.exception.code, 2)
             evaluator.assert_not_called()
+
+    def test_matched_model_replay_retains_hard_denial(self):
+        from mcp_shield.offline import replay_models
+        denied = copy.deepcopy(self.sample)
+        denied["signals"]["hidden_instruction"] = True
+        result = replay_models([self.sample, denied], self.model, {**self.model, "prior": .999999})
+        self.assertEqual(result["transitions"]["allow"]["review"], 1)
+        self.assertEqual(result["transitions"]["deny"]["deny"], 1)
+        self.assertEqual([r["index"] for r in result["rows"]], [0, 1])

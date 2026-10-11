@@ -163,6 +163,9 @@ example failures. Summary export remains independently atomic.
 Evaluation exports must have distinct destinations; batch output must not alias
 its observation input or model. Resolved path and existing-file identity checks
 prevent accidental source/model replacement, including hard-link aliases.
+`replay observations.json --before old.json --after new.json` compares model
+verdicts on the same bounded batch, exposing the complete decision-transition
+matrix. Explicit gates still deny under both models; no quality claim follows.
 
 ### Run alongside the other projects
 
