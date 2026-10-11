@@ -98,3 +98,32 @@ class ServerFeatureTests(unittest.TestCase):
         self.assertEqual(self.request("POST", "/api/batch", [self.sample, {}])[0], 400)
         self.assertEqual(self.request("POST", "/api/compare", [self.sample])[0], 400)
         self.assertEqual(self.request("GET", "/health")[0], 200)
+
+    def test_concurrent_worker_capacity_rejects_excess_and_recovers(self):
+        from mcp_shield.core import inspect
+        self.close_server()
+        self.server = make_server(self.model, 0, max_workers=1)
+        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        self.thread.start()
+        entered, release = threading.Event(), threading.Event()
+        results = []
+
+        def delayed(value, model):
+            entered.set()
+            release.wait(timeout=2)
+            return inspect(value, model)
+
+        with patch("mcp_shield.server.inspect", side_effect=delayed):
+            worker = threading.Thread(target=lambda: results.append(self.request("POST", "/api/inspect", self.sample)))
+            worker.start()
+            try:
+                self.assertTrue(entered.wait(timeout=2))
+                self.assertEqual(self.request("GET", "/health")[0], 503)
+            finally:
+                release.set()
+                worker.join(timeout=3)
+        self.assertEqual(results[0][0], 200)
+        self.assertEqual(self.request("GET", "/health")[0], 200)
+        for workers in (0, 33, True):
+            with self.assertRaises(ValueError):
+                make_server(self.model, 0, max_workers=workers)

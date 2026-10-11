@@ -255,6 +255,9 @@ comparison/validation; a complete observation otherwise). All share loopback
 Host/Origin checks, strict UTF-8/JSON and the existing **16,384-byte total HTTP
 body limit**, even when a batch has fewer than 100 items. Validation reports are
 schema-only; none of these endpoints collects telemetry or executes tools.
+Worker slots are released after completion or disconnect, and overload rejection
+does not execute inference. The native `make_server` API can choose 1–32 workers;
+this local-demo bound is not authentication or a production availability guarantee.
 
 ### Run alongside the other projects
 
@@ -383,7 +386,8 @@ The service binds loopback only, checks Host and Origin, has no CORS permission,
 and sends a restrictive content-security policy. Inputs are not logged or stored.
 
 It is a single-user local demo, **not an authenticated network service**. Other
-local processes can access it, and it has no rate limiter or concurrency quota.
+local processes can access it, and it has no rate limiter. At most eight request workers run concurrently;
+excess connections receive JSON 503 with retry guidance.
 Do not expose it using tunnels or reverse proxies. Model files are plain JSON,
 not pickle; only load models you trust.
 

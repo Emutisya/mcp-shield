@@ -2,6 +2,7 @@
 
 import json
 import copy
+import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
 from urllib.parse import urlsplit
@@ -13,7 +14,9 @@ from .offline import (compare_observations, count_boundaries, fingerprint, inspe
 MAX_BODY = 16384
 
 
-def make_server(model, port=8765):
+def make_server(model, port=8765, max_workers=8):
+    if type(max_workers) is not int or not 1 <= max_workers <= 32:
+        raise ValueError("max_workers must be an integer from 1 to 32.")
     validate_model(model)
     model = copy.deepcopy(model)
     model_identity = fingerprint(model)
@@ -27,6 +30,34 @@ def make_server(model, port=8765):
         "/api/boundaries": lambda value: count_boundaries(value, model),
         "/api/validate": validation_report,
     }
+    slots = threading.BoundedSemaphore(max_workers)
+
+    class BoundedServer(ThreadingHTTPServer):
+        def process_request(self, request, client_address):
+            if not slots.acquire(blocking=False):
+                body = b'{"error":"Local request capacity is busy. Retry after an active request finishes."}'
+                response = (f"HTTP/1.1 503 Service Unavailable\r\nContent-Type: application/json; charset=utf-8\r\n"
+                            f"Content-Length: {len(body)}\r\nConnection: close\r\nRetry-After: 1\r\n"
+                            "Cache-Control: no-store\r\nX-Content-Type-Options: nosniff\r\n\r\n").encode() + body
+                try:
+                    request.settimeout(1)
+                    request.sendall(response)
+                except OSError:
+                    pass
+                finally:
+                    self.shutdown_request(request)
+                return
+            try:
+                super().process_request(request, client_address)
+            except BaseException:
+                slots.release()
+                raise
+
+        def process_request_thread(self, request, client_address):
+            try:
+                super().process_request_thread(request, client_address)
+            finally:
+                slots.release()
 
     class Handler(BaseHTTPRequestHandler):
         def setup(self):
@@ -122,4 +153,4 @@ def make_server(model, port=8765):
 
         do_HEAD = do_GET
 
-    return ThreadingHTTPServer(("127.0.0.1", port), Handler)
+    return BoundedServer(("127.0.0.1", port), Handler)
