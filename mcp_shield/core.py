@@ -12,6 +12,8 @@ FEATURES = (*FLAGS, "unverified_publisher", "metadata_drift", "call_anomaly",
             "large_response", "instruction_language", "sensitive_language")
 MODEL_VERSION = 1
 MAX_MODEL_BYTES = 65536
+VOCABULARY = {"instruction_language": {"instruction", "override", "directive", "priority"},
+              "sensitive_language": {"credential", "secret", "token", "private"}}
 
 
 def unique_fields(pairs):
@@ -48,15 +50,20 @@ def validate(value):
     return value
 
 
-def features(value):
+def language_cues(value):
     validate(value)
-    s = value["signals"]
     words = set(re.findall(r"[a-z]+", value["tool"]["description"].lower()))
+    return {name: sorted(words & vocabulary) for name, vocabulary in VOCABULARY.items()}
+
+
+def features(value):
+    cues = language_cues(value)
+    s = value["signals"]
     return [int(s[k]) for k in FLAGS] + [
         int(not s["verified_publisher"]), int(s["metadata_changes"] > 0),
         int(s["unexpected_calls"] > 2), int(s["response_bytes"] > 65536),
-        int(bool(words & {"instruction", "override", "directive", "priority"})),
-        int(bool(words & {"credential", "secret", "token", "private"})),
+        int(bool(cues["instruction_language"])),
+        int(bool(cues["sensitive_language"])),
     ]
 
 
@@ -151,6 +158,7 @@ def inspect(value, model):
         reasons.append("No observed policy gate fired; this is not a safety guarantee.")
     return {"decision": decision, "uncalibrated_ml_probability": probability,
             "prior_log_odds": prior_log_odds, "posterior_log_odds": log_odds,
+            "language_cues": language_cues(value),
             "reasons": reasons, "gates": gates,
             "review_triggers": review_triggers,
             "contributions": [row for _, row in sorted(explanations, key=lambda item: abs(item[0]), reverse=True)],

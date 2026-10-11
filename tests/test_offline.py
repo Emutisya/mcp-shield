@@ -139,3 +139,11 @@ class OfflineTests(unittest.TestCase):
         reconstructed = result["prior_log_odds"] + math.fsum(c["raw_log_odds_contribution"] for c in result["contributions"])
         self.assertAlmostEqual(reconstructed, result["posterior_log_odds"], places=12)
         self.assertAlmostEqual(1 / (1 + math.exp(-reconstructed)), result["uncalibrated_ml_probability"], places=12)
+
+    def test_lexical_trace_identifies_inert_cues_not_substrings(self):
+        value = copy.deepcopy(self.sample)
+        value["tool"]["description"] = "PRIORITY archive with private annotations, tokenization."
+        result = inspect(value, self.model)
+        self.assertEqual(result["language_cues"],
+                         {"instruction_language": ["priority"], "sensitive_language": ["private"]})
+        self.assertEqual(result["gates"], [])

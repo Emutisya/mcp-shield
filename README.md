@@ -133,6 +133,9 @@ or an earlier reason takes precedence. Deny still overrides all review triggers.
 Prior and posterior log-odds plus raw per-feature contributions allow numerical
 reconstruction of the model score. Rounded contributions remain for display.
 These learned associations are not causal evidence or calibrated risk.
+`language_cues` names the exact ASCII word cues matched in inert descriptions.
+Substrings such as “tokenization” do not match “token”; innocent descriptions
+can match, and missing matches do not establish safety or multilingual coverage.
 
 ### Run alongside the other projects
 
