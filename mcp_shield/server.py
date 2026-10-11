@@ -3,6 +3,9 @@
 import json
 import copy
 import threading
+import math
+import time
+import socket
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
 from urllib.parse import urlsplit
@@ -14,9 +17,30 @@ from .offline import (compare_observations, count_boundaries, fingerprint, inspe
 MAX_BODY = 16384
 
 
-def make_server(model, port=8765, max_workers=8):
+def finish_rejection(connection):
+    """Brief bounded drain prevents unread request bytes resetting an error reply."""
+    try:
+        connection.shutdown(socket.SHUT_WR)
+        deadline = time.monotonic() + .1
+        remaining_bytes = MAX_BODY * 2
+        while remaining_bytes > 0:
+            remaining_time = deadline - time.monotonic()
+            if remaining_time <= 0:
+                break
+            connection.settimeout(remaining_time)
+            chunk = connection.recv(min(4096, remaining_bytes))
+            if not chunk:
+                break
+            remaining_bytes -= len(chunk)
+    except OSError:
+        pass
+
+
+def make_server(model, port=8765, max_workers=8, body_timeout=5):
     if type(max_workers) is not int or not 1 <= max_workers <= 32:
         raise ValueError("max_workers must be an integer from 1 to 32.")
+    if type(body_timeout) not in (int, float) or not math.isfinite(body_timeout) or not 0 < body_timeout <= 30:
+        raise ValueError("body_timeout must be finite and greater than 0, at most 30 seconds.")
     validate_model(model)
     model = copy.deepcopy(model)
     model_identity = fingerprint(model)
@@ -42,6 +66,7 @@ def make_server(model, port=8765, max_workers=8):
                 try:
                     request.settimeout(1)
                     request.sendall(response)
+                    finish_rejection(request)
                 except OSError:
                     pass
                 finally:
@@ -92,6 +117,9 @@ def make_server(model, port=8765, max_workers=8):
             self.end_headers()
             if self.command != "HEAD":
                 self.wfile.write(data)
+            if status >= 400:
+                self.close_connection = True
+                finish_rejection(self.connection)
 
         def authorized(self):
             expected = f"127.0.0.1:{self.server.server_port}"
@@ -139,7 +167,21 @@ def make_server(model, port=8765, max_workers=8):
                 if not 0 < length <= MAX_BODY:
                     self.respond(413, '{"error":"Body must be 1 to 16384 bytes."}')
                     return
-                body = self.rfile.read(length)
+                deadline = time.monotonic() + body_timeout
+                chunks = []
+                received = 0
+                while received < length:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 0:
+                        raise TimeoutError("Request body deadline exceeded.")
+                    self.connection.settimeout(remaining)
+                    chunk = self.rfile.read1(min(4096, length - received))
+                    if not chunk:
+                        break
+                    chunks.append(chunk)
+                    received += len(chunk)
+                self.connection.settimeout(5)
+                body = b"".join(chunks)
                 if len(body) != length:
                     raise ValueError("Incomplete request body.")
                 result = operations[self.path](json.loads(body.decode("utf-8"), object_pairs_hook=unique_fields))
@@ -147,6 +189,7 @@ def make_server(model, port=8765, max_workers=8):
                 self.respond(400, json.dumps({"error": str(exc)}))
                 return
             except TimeoutError:
+                self.connection.settimeout(5)
                 self.respond(408, '{"error":"Request body timed out. Send a complete JSON request."}')
                 return
             self.respond(200, json.dumps(result))

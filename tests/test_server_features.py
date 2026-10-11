@@ -127,3 +127,27 @@ class ServerFeatureTests(unittest.TestCase):
         for workers in (0, 33, True):
             with self.assertRaises(ValueError):
                 make_server(self.model, 0, max_workers=workers)
+
+    def test_total_body_deadline_expires_despite_partial_progress(self):
+        import socket
+        import time
+        self.close_server()
+        self.server = make_server(self.model, 0, body_timeout=.15)
+        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        self.thread.start()
+        host = f"127.0.0.1:{self.server.server_port}"
+        with socket.create_connection(("127.0.0.1", self.server.server_port), timeout=2) as connection:
+            connection.sendall((f"POST /api/inspect HTTP/1.1\r\nHost: {host}\r\nContent-Type: application/json\r\n"
+                                "Content-Length: 100\r\n\r\n{").encode())
+            for _ in range(3):
+                time.sleep(.04)
+                try:
+                    connection.sendall(b" ")
+                except OSError:
+                    break
+            response = connection.recv(4096)
+        self.assertIn(b"408", response.split(b"\r\n", 1)[0])
+        self.assertEqual(self.request("GET", "/health")[0], 200)
+        for timeout in (0, float("nan"), True, 31):
+            with self.assertRaises(ValueError):
+                make_server(self.model, 0, body_timeout=timeout)

@@ -258,6 +258,13 @@ schema-only; none of these endpoints collects telemetry or executes tools.
 Worker slots are released after completion or disconnect, and overload rejection
 does not execute inference. The native `make_server` API can choose 1–32 workers;
 this local-demo bound is not authentication or a production availability guarantee.
+HTTP bodies have a five-second total completion deadline, not just a timeout
+that resets whenever another byte arrives. Partial-progress stalls receive 408,
+release their worker and leave the service responsive. Header reads still use
+the existing five-second socket timeout; this is not a production slow-client defense.
+Error replies briefly drain at most 32,768 unread transport bytes for at most
+100 milliseconds before closing, to reduce TCP resets that can obscure recovery
+messages. Drained bytes are discarded, never parsed, stored or used for inference.
 
 ### Run alongside the other projects
 
