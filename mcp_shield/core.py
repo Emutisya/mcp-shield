@@ -13,6 +13,15 @@ FEATURES = (*FLAGS, "unverified_publisher", "metadata_drift", "call_anomaly",
 MODEL_VERSION = 1
 
 
+def unique_fields(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise ValueError("Duplicate JSON fields are not accepted.")
+        result[key] = value
+    return result
+
+
 def validate(value):
     if not isinstance(value, dict) or set(value) != {"server", "tool", "signals"}:
         raise ValueError("Expected exactly server, tool, and signals objects.")
@@ -90,7 +99,7 @@ def validate_model(model):
 
 
 def load_model(path):
-    return validate_model(json.loads(Path(path).read_text(encoding="utf-8")))
+    return validate_model(json.loads(Path(path).read_text(encoding="utf-8"), object_pairs_hook=unique_fields))
 
 
 def inspect(value, model):

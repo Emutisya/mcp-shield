@@ -176,6 +176,19 @@ class ShieldTests(unittest.TestCase):
         self.assertIsNone(metrics([(0, 0)])["recall"])
         self.assertIsNone(metrics([(0, 0)])["precision"])
 
+    def test_heldout_family_metrics_reconcile_without_masking_group_failures(self):
+        report = evaluate()
+        families = report["per_family"]
+        self.assertEqual(sorted(families), report["test_families"])
+        self.assertEqual(sum(group["rows"] for group in families.values()), report["test_rows"])
+        for field in ("tp", "fp", "tn", "fn"):
+            self.assertEqual(sum(group["ml"][field] for group in families.values()), report["ml"][field])
+        for decision in ("allow", "review", "deny"):
+            self.assertEqual(sum(group["policy_decisions"][decision] for group in families.values()),
+                             report["policy_decisions"][decision])
+        self.assertTrue(any(group["ml"]["fn"] for group in families.values()))
+        self.assertTrue(any(group["ml"]["fp"] for group in families.values()))
+
     def test_cli_rejects_invalid_ports_before_loading_model(self):
         for port in ("-1", "65536", "999999999999999999999"):
             with self.subTest(port=port):
@@ -219,6 +232,28 @@ class ShieldTests(unittest.TestCase):
         self.assertIn("--port 0", result.stderr)
         self.assertNotIn("Traceback", result.stderr)
         self.assertEqual(result.stdout, "")
+
+    def test_cli_json_boundaries_match_http_inspection(self):
+        with tempfile.TemporaryDirectory() as directory:
+            model = Path(directory) / "model.json"
+            model.write_text(json.dumps(self.model), encoding="utf-8")
+            path = Path(directory) / "input.json"
+            for raw, error in (
+                (json.dumps(self.sample).encode("utf-16"), "Error:"),
+                (json.dumps(self.sample).replace('"verified_publisher": true',
+                    '"verified_publisher": false, "verified_publisher": true').encode(), "Duplicate JSON"),
+                (b"x" * 16385, "1 to 16384 bytes"),
+                (b"[" * 1500 + b"]" * 1500, "Error:"),
+            ):
+                path.write_bytes(raw)
+                result = subprocess.run(
+                    [sys.executable, "-m", "mcp_shield", "inspect", str(path), "--model", str(model)],
+                    cwd=ROOT, text=True, capture_output=True, timeout=10,
+                )
+                self.assertEqual(result.returncode, 2)
+                self.assertIn(error, result.stderr)
+                self.assertEqual(result.stdout, "")
+                self.assertNotIn("Traceback", result.stderr)
 
     def test_local_http_inference_and_errors(self):
         server = make_server(self.model, 0)

@@ -30,6 +30,16 @@ def evaluate(seed=17):
     failures = [{"id": r["id"], "label": r["label"], "decision": p["decision"],
                  "score": p["uncalibrated_ml_probability"]}
                 for r, p in results if (p["uncalibrated_ml_probability"] >= 0.5) != bool(r["label"])]
+    per_family = {}
+    for family in sorted({row["family"] for row, _ in results}):
+        group = [(row, prediction) for row, prediction in results if row["family"] == family]
+        per_family[family] = {
+            "rows": len(group), "positive_labels": sum(row["label"] for row, _ in group),
+            "ml": metrics([(row["label"], int(prediction["uncalibrated_ml_probability"] >= .5))
+                           for row, prediction in group]),
+            "policy_decisions": {decision: sum(prediction["decision"] == decision for _, prediction in group)
+                                 for decision in ("allow", "review", "deny")},
+        }
     return {"data": "Explicitly synthetic; latent toy labels, not verified attacks.",
             "training_sha256": hashlib.sha256(json.dumps(training, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest(),
             "heldout_sha256": hashlib.sha256(json.dumps(heldout, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest(),
@@ -43,6 +53,7 @@ def evaluate(seed=17):
             "policy_nonallow_as_positive": metrics([(r["label"], int(p["decision"] != "allow")) for r, p in results]),
             "policy_decisions": {d: sum(p["decision"] == d for _, p in results) for d in ("allow", "review", "deny")},
             "ml_failure_count": len(failures), "first_12_ml_failures": failures[:12],
+            "per_family": per_family,
             "limitations": [
                 "All numbers measure toy synthetic distributions, not real-world detection.",
                 "Signal provenance is trusted; unseen attacks and dishonest signals can pass.",

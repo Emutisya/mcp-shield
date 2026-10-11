@@ -4,10 +4,10 @@ import os
 import tempfile
 from pathlib import Path
 
-from .core import inspect, load_model, train
+from .core import inspect, load_model, train, unique_fields
 from .data import dataset, split
 from .evaluation import evaluate
-from .server import make_server
+from .server import MAX_BODY, make_server
 
 
 def write_output(path, text):
@@ -56,7 +56,11 @@ def main():
                 write_output(args.output, report)
             print(report)
         elif args.command == "inspect":
-            value = json.loads(Path(args.input).read_text(encoding="utf-8"))
+            with Path(args.input).open("rb") as source:
+                raw = source.read(MAX_BODY + 1)
+            if not 0 < len(raw) <= MAX_BODY:
+                raise ValueError(f"Inspection input must be 1 to {MAX_BODY} bytes.")
+            value = json.loads(raw.decode("utf-8"), object_pairs_hook=unique_fields)
             print(json.dumps(inspect(value, load_model(args.model)), indent=2))
         else:
             model = load_model(args.model)
@@ -71,6 +75,8 @@ def main():
                 pass
             finally:
                 server.server_close()
+    except RecursionError:
+        parser.exit(2, "Error: JSON nesting is too deep. Use the documented inspection and model schemas.\n")
     except (OSError, ValueError) as exc:
         parser.exit(2, f"Error: {exc}\n")
 

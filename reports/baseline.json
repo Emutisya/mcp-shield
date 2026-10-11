@@ -130,6 +130,80 @@
       "score": 0.3988252807533238
     }
   ],
+  "per_family": {
+    "clinic": {
+      "rows": 100,
+      "positive_labels": 42,
+      "ml": {
+        "tp": 41,
+        "fp": 10,
+        "tn": 48,
+        "fn": 1,
+        "accuracy": 0.89,
+        "precision": 0.8039,
+        "recall": 0.9762
+      },
+      "policy_decisions": {
+        "allow": 27,
+        "review": 32,
+        "deny": 41
+      }
+    },
+    "energy": {
+      "rows": 100,
+      "positive_labels": 46,
+      "ml": {
+        "tp": 39,
+        "fp": 3,
+        "tn": 51,
+        "fn": 7,
+        "accuracy": 0.9,
+        "precision": 0.9286,
+        "recall": 0.8478
+      },
+      "policy_decisions": {
+        "allow": 21,
+        "review": 44,
+        "deny": 35
+      }
+    },
+    "forest": {
+      "rows": 100,
+      "positive_labels": 42,
+      "ml": {
+        "tp": 33,
+        "fp": 4,
+        "tn": 54,
+        "fn": 9,
+        "accuracy": 0.87,
+        "precision": 0.8919,
+        "recall": 0.7857
+      },
+      "policy_decisions": {
+        "allow": 23,
+        "review": 39,
+        "deny": 38
+      }
+    },
+    "school": {
+      "rows": 100,
+      "positive_labels": 54,
+      "ml": {
+        "tp": 44,
+        "fp": 2,
+        "tn": 44,
+        "fn": 10,
+        "accuracy": 0.88,
+        "precision": 0.9565,
+        "recall": 0.8148
+      },
+      "policy_decisions": {
+        "allow": 21,
+        "review": 37,
+        "deny": 42
+      }
+    }
+  },
   "limitations": [
     "All numbers measure toy synthetic distributions, not real-world detection.",
     "Signal provenance is trusted; unseen attacks and dishonest signals can pass.",

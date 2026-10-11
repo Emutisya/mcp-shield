@@ -5,18 +5,9 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.resources import files
 from urllib.parse import urlsplit
 
-from .core import inspect, validate_model
+from .core import inspect, unique_fields, validate_model
 
 MAX_BODY = 16384
-
-
-def unique_fields(pairs):
-    result = {}
-    for key, value in pairs:
-        if key in result:
-            raise ValueError("Duplicate JSON fields are not accepted.")
-        result[key] = value
-    return result
 
 
 def make_server(model, port=8765):
