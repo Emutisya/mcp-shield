@@ -5,6 +5,12 @@ from .data import dataset, split
 
 
 def metrics(pairs):
+    if not isinstance(pairs, (list, tuple)) or not pairs:
+        raise ValueError("Metrics require at least one labelled prediction.")
+    if any(not isinstance(pair, (list, tuple)) or len(pair) != 2
+           or any(type(value) is not int or value not in (0, 1) for value in pair)
+           for pair in pairs):
+        raise ValueError("Metric labels and predictions must be integers of 0 or 1.")
     tp = sum(y == 1 and p == 1 for y, p in pairs)
     fp = sum(y == 0 and p == 1 for y, p in pairs)
     tn = sum(y == 0 and p == 0 for y, p in pairs)

@@ -9,7 +9,7 @@ from pathlib import Path
 
 from mcp_shield.core import FLAGS, features, inspect, train, validate, validate_model
 from mcp_shield.data import dataset, split
-from mcp_shield.evaluation import evaluate
+from mcp_shield.evaluation import evaluate, metrics
 from mcp_shield.server import make_server
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -99,6 +99,14 @@ class ShieldTests(unittest.TestCase):
         self.assertGreater(report["ml"]["fp"], 0)
         self.assertEqual(sum(report["policy_decisions"].values()), report["test_rows"])
         self.assertEqual(report, json.loads((ROOT / "reports" / "baseline.json").read_text()))
+
+    def test_metric_inputs_reject_empty_and_nonbinary_predictions(self):
+        for pairs in (None, [], [(1,)], [(2, 0)], [(True, 1)], [(0, 0.0)]):
+            with self.subTest(pairs=pairs), self.assertRaises(ValueError):
+                metrics(pairs)
+        self.assertEqual(metrics([(0, 0)])["accuracy"], 1)
+        self.assertIsNone(metrics([(0, 0)])["recall"])
+        self.assertIsNone(metrics([(0, 0)])["precision"])
 
     def test_cli_rejects_invalid_ports_before_loading_model(self):
         for port in ("-1", "65536", "999999999999999999999"):
