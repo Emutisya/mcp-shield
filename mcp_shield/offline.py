@@ -3,9 +3,10 @@
 import json
 import hashlib
 import math
+import copy
 from pathlib import Path
 
-from .core import FEATURES, features, inspect, unique_fields, validate, validate_model
+from .core import FEATURES, FLAGS, features, inspect, unique_fields, validate, validate_model
 
 WARNING = "Offline synthetic simulation only; observations are caller supplied, not independently verified."
 MAX_BATCH = 100
@@ -86,3 +87,17 @@ def compare_observations(values, model):
             "changed_features": [name for name, left, right in zip(FEATURES, x, y) if left != right],
             "added_gates": sorted(set(b["gates"]) - set(a["gates"])),
             "removed_gates": sorted(set(a["gates"]) - set(b["gates"]))}
+
+
+def sensitivity(value, model):
+    baseline = inspect(value, model)
+    variants = []
+    for signal in (*FLAGS, "verified_publisher"):
+        hypothetical = copy.deepcopy(value)
+        hypothetical["signals"][signal] = not hypothetical["signals"][signal]
+        result = inspect(hypothetical, model)
+        variants.append({"signal": signal, "hypothetical_value": hypothetical["signals"][signal],
+                         "result": result,
+                         "probability_delta": result["uncalibrated_ml_probability"] - baseline["uncalibrated_ml_probability"]})
+    return {"warning": WARNING, "boundary": "One-variable synthetic sensitivity; not causal evidence or remediation advice. Never falsify observed signals.",
+            "baseline": baseline, "variants": variants}

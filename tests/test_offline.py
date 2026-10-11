@@ -101,3 +101,12 @@ class OfflineTests(unittest.TestCase):
         self.assertEqual(result["after"]["decision"], "deny")
         with self.assertRaises(ValueError):
             compare_observations([self.sample], self.model)
+
+    def test_boolean_sensitivity_preserves_original_and_hard_gates(self):
+        from mcp_shield.offline import sensitivity
+        original = copy.deepcopy(self.sample)
+        result = sensitivity(self.sample, self.model)
+        self.assertEqual(self.sample, original)
+        self.assertEqual(len(result["variants"]), 5)
+        self.assertTrue(all(v["result"]["decision"] == "deny" for v in result["variants"][:4]))
+        self.assertEqual(result["variants"][-1]["result"]["decision"], "review")

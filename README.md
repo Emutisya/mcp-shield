@@ -120,6 +120,10 @@ artifact fields. Unsupported metadata cannot masquerade as model certification.
 `compare pair.json` takes exactly two complete synthetic observations and shows
 both advisory verdicts, feature changes, probability delta and added/removed gates.
 This is a simulation comparison, not advice to suppress genuine observations.
+`sensitivity examples\catalog.json` hypothetically toggles each boolean signal
+one at a time, preserving the original. Every variant still runs explicit gates.
+These are synthetic sensitivity examples, not causal explanations, remediation
+instructions or permission to falsify genuine observations.
 
 ### Run alongside the other projects
 
