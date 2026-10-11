@@ -113,6 +113,7 @@ def inspect(value, model):
     x = features(value)
     validate_model(model)
     log_odds = math.log(model["prior"]) - math.log1p(-model["prior"])
+    prior_log_odds = log_odds
     explanations = []
     for j, present in enumerate(x):
         benign, risky = (a[j] for a in model["probabilities"])
@@ -120,7 +121,8 @@ def inspect(value, model):
                         else math.log1p(-risky) - math.log1p(-benign))
         log_odds += contribution
         explanations.append((contribution, {"feature": FEATURES[j], "present": bool(present),
-                             "log_odds_contribution": round(contribution, 4)}))
+                             "log_odds_contribution": round(contribution, 4),
+                             "raw_log_odds_contribution": contribution}))
     probability = 1 / (1 + math.exp(-max(-700, min(700, log_odds))))
     gates = [key for key in FLAGS if value["signals"][key]]
     review_triggers = []
@@ -148,6 +150,7 @@ def inspect(value, model):
         decision = "allow"
         reasons.append("No observed policy gate fired; this is not a safety guarantee.")
     return {"decision": decision, "uncalibrated_ml_probability": probability,
+            "prior_log_odds": prior_log_odds, "posterior_log_odds": log_odds,
             "reasons": reasons, "gates": gates,
             "review_triggers": review_triggers,
             "contributions": [row for _, row in sorted(explanations, key=lambda item: abs(item[0]), reverse=True)],

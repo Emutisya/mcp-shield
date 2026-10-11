@@ -130,6 +130,9 @@ review even though the learned call feature changes only above two. Values are
 not rates, forecasts, or advice to suppress actual events.
 Inspection includes every `review_triggers` entry, even when a hard gate denies
 or an earlier reason takes precedence. Deny still overrides all review triggers.
+Prior and posterior log-odds plus raw per-feature contributions allow numerical
+reconstruction of the model score. Rounded contributions remain for display.
+These learned associations are not causal evidence or calibrated risk.
 
 ### Run alongside the other projects
 

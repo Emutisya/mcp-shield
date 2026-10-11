@@ -132,3 +132,10 @@ class OfflineTests(unittest.TestCase):
         self.assertEqual(result["decision"], "deny")
         self.assertEqual(result["review_triggers"],
                          ["ml_threshold", "metadata_drift", "unexpected_calls", "unverified_publisher"])
+
+    def test_full_precision_explanation_reconstructs_posterior(self):
+        import math
+        result = inspect(self.sample, self.model)
+        reconstructed = result["prior_log_odds"] + math.fsum(c["raw_log_odds_contribution"] for c in result["contributions"])
+        self.assertAlmostEqual(reconstructed, result["posterior_log_odds"], places=12)
+        self.assertAlmostEqual(1 / (1 + math.exp(-reconstructed)), result["uncalibrated_ml_probability"], places=12)
