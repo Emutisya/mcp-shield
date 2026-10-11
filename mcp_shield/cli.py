@@ -26,6 +26,15 @@ def write_output(path, text):
             temporary.unlink(missing_ok=True)
 
 
+def validate_outputs(sources, outputs):
+    sources = [Path(p).resolve() for p in sources if p]
+    outputs = [Path(p).resolve() for p in outputs if p]
+    for index, output in enumerate(outputs):
+        for other in sources + outputs[:index]:
+            if output == other or (output.exists() and other.exists() and output.samefile(other)):
+                raise ValueError("Output paths must be distinct from inputs, models and other exports.")
+
+
 def main():
     parser = argparse.ArgumentParser(description="MCP Shield offline synthetic inspection simulator")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -76,6 +85,10 @@ def main():
     if args.command == "serve" and not 0 <= args.port <= 65535:
         parser.error("--port must be between 0 and 65535; use 0 to choose an available port.")
     try:
+        if args.command == "evaluate":
+            validate_outputs([], [args.output, args.predictions])
+        elif args.command == "batch":
+            validate_outputs([args.input, args.model], [args.output])
         if args.command == "train":
             rows, _ = split(dataset(args.seed))
             result = train(rows)

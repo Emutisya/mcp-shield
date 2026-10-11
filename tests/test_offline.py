@@ -213,3 +213,16 @@ class OfflineTests(unittest.TestCase):
         for family, count in (("unknown", 1), ("school", 0), ("school", 101), ("school", True)):
             with self.assertRaises(ValueError):
                 sample_observations(family, count)
+
+    def test_cli_rejects_aliasing_exports_before_evaluation(self):
+        from contextlib import redirect_stderr
+        import io
+        from mcp_shield.cli import main, validate_outputs
+        with self.assertRaises(ValueError):
+            validate_outputs(["README.md"], [str(Path("README.md").resolve())])
+        with patch("sys.argv", ["shield", "evaluate", "--output", "same.json", "--predictions", str(Path("same.json").resolve())]), \
+             patch("mcp_shield.cli.evaluate") as evaluator, redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit) as exit:
+                main()
+            self.assertEqual(exit.exception.code, 2)
+            evaluator.assert_not_called()

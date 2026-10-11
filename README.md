@@ -160,6 +160,9 @@ Only predeclared generator families are accepted; no real telemetry is collected
 families, toy labels, display scores, full-precision classifications and policy
 triggers without raw observation metadata. This enables audit beyond twelve
 example failures. Summary export remains independently atomic.
+Evaluation exports must have distinct destinations; batch output must not alias
+its observation input or model. Resolved path and existing-file identity checks
+prevent accidental source/model replacement, including hard-link aliases.
 
 ### Run alongside the other projects
 
