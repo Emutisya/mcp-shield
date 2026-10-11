@@ -269,6 +269,10 @@ Native training rejects held-out/unknown split tags, duplicate supplied IDs and
 unsupported row metadata, preventing accidental full-dataset training. Minimal
 `input`/binary-integer-`label` rows remain supported; tags are caller supplied and
 their absence does not prove synthetic origin or independence.
+`model-stability examples\catalog.json --seeds 17 18 19` inspects one fixed
+synthetic observation under up to ten separately seeded training models. It
+reports model identities, score range and verdict counts without choosing a model
+or majority-vote policy. Ranges are seed sensitivity, not uncertainty or calibration.
 
 ### Run alongside the other projects
 

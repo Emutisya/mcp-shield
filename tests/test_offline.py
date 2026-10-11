@@ -334,3 +334,15 @@ class OfflineTests(unittest.TestCase):
             train([{**training[0], "unsupported_metadata": "fictional"}, training[1]])
         minimal = [{"input": self.sample, "label": label} for label in (0, 1)]
         self.assertEqual(train(minimal)["training_rows"], 2)
+
+    def test_training_seed_stability_never_votes_away_a_hard_gate(self):
+        from mcp_shield.offline import model_stability
+        value = copy.deepcopy(self.sample)
+        value["signals"]["credential_request"] = True
+        report = model_stability(value, [17, 18])
+        self.assertEqual(report, model_stability(value, [17, 18]))
+        self.assertEqual(report["decision_counts"]["deny"], 2)
+        self.assertNotEqual(report["runs"][0]["model_sha256"], report["runs"][1]["model_sha256"])
+        self.assertNotIn("selected_model", report)
+        with self.assertRaises(ValueError):
+            model_stability(value, [17, 17])

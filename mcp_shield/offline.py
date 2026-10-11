@@ -280,3 +280,19 @@ def reproduce_receipt(stored, value, model):
             "observation_sha256": expected["observation_sha256"],
             "numeric_tolerance": {"relative": 1e-12, "absolute": 1e-12},
             "boundary": "Reproduction checks unsigned content, not source authenticity or safety. Policy verdicts and identities match exactly."}
+
+
+def model_stability(value, seeds):
+    from .data import dataset, split
+    from .evaluation import validate_seeds
+    validate(value)
+    validate_seeds(seeds)
+    runs = []
+    for seed in seeds:
+        model = train(split(dataset(seed))[0])
+        runs.append({"seed": seed, "model_sha256": fingerprint(model), "result": inspect(value, model)})
+    scores = [r["result"]["uncalibrated_ml_probability"] for r in runs]
+    return {"warning": WARNING, "observation_sha256": fingerprint(value), "runs": runs,
+            "score_range": [min(scores), max(scores)],
+            "decision_counts": {d: sum(r["result"]["decision"] == d for r in runs) for d in ("allow", "review", "deny")},
+            "boundary": "Synthetic training-seed sensitivity, not uncertainty, calibration or a model selection/voting policy."}

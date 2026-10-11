@@ -121,10 +121,14 @@ def evaluate(seed=17, include_predictions=False):
     return report
 
 
-def evaluate_seeds(seeds):
+def validate_seeds(seeds):
     if (not isinstance(seeds, list) or not 1 <= len(seeds) <= 10
             or any(type(seed) is not int for seed in seeds) or len(set(seeds)) != len(seeds)):
         raise ValueError("Supply 1–10 distinct integer seeds.")
+
+
+def evaluate_seeds(seeds):
+    validate_seeds(seeds)
     reports = [evaluate(seed) for seed in seeds]
     runs = [{"seed": r["seed"], "training_sha256": r["training_sha256"], "heldout_sha256": r["heldout_sha256"],
              "ml": r["ml"], "policy": r["policy_nonallow_as_positive"], "decisions": r["policy_decisions"]}
