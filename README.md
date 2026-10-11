@@ -147,6 +147,9 @@ acceptance does not imply language-model coverage.
 Batch `feature_groups` breaks advisory decisions down by presence and absence of
 each feature, retaining empty groups. These counts are descriptive synthetic
 cohort summaries, not validated detections or population estimates.
+Evaluation cross-tabulates ML positives at 0.5 against the three policy verdicts.
+It exposes low-score denial/review and ML-positive allow separately rather than
+suggesting the learned classifier and explicit policy are interchangeable.
 
 ### Run alongside the other projects
 

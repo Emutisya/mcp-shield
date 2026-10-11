@@ -35,3 +35,12 @@ def decision_burden(rows):
         "positive_labels": sum(r["decision"] == decision and r["label"] == 1 for r in rows),
         "fraction": round(sum(r["decision"] == decision for r in rows) / len(rows), 4),
     } for decision in ("allow", "review", "deny")}
+
+
+def classifier_policy_cross_tab(rows):
+    decision_burden(rows)
+    return {str(prediction): {decision: {
+        "rows": sum(int(r["score"] >= .5) == prediction and r["decision"] == decision for r in rows),
+        "positive_labels": sum(r["label"] for r in rows
+                               if int(r["score"] >= .5) == prediction and r["decision"] == decision),
+    } for decision in ("allow", "review", "deny")} for prediction in (0, 1)}

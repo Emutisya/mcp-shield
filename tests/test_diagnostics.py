@@ -54,3 +54,11 @@ class DiagnosticTests(unittest.TestCase):
         for d in ("allow", "review", "deny"):
             self.assertEqual(sum(g["decision_burden"][d]["benign_labels"] for g in report["per_family"].values()),
                              report["decision_burden"][d]["benign_labels"])
+
+    def test_classifier_policy_cross_tab_keeps_disagreement_visible(self):
+        from mcp_shield.diagnostics import classifier_policy_cross_tab
+        rows = [dict(r, decision=d) for r, d in zip(self.rows, ("deny", "allow", "review", "deny"))]
+        result = classifier_policy_cross_tab(rows)
+        self.assertEqual(result["0"]["deny"]["rows"], 1)
+        self.assertEqual(result["1"]["allow"]["positive_labels"], 1)
+        self.assertEqual(sum(v["rows"] for g in result.values() for v in g.values()), 4)

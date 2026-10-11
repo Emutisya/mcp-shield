@@ -129,6 +129,36 @@
       "fraction": 0.39
     }
   },
+  "classifier_policy_cross_tab": {
+    "0": {
+      "allow": {
+        "rows": 89,
+        "positive_labels": 5
+      },
+      "review": {
+        "rows": 106,
+        "positive_labels": 14
+      },
+      "deny": {
+        "rows": 29,
+        "positive_labels": 8
+      }
+    },
+    "1": {
+      "allow": {
+        "rows": 3,
+        "positive_labels": 0
+      },
+      "review": {
+        "rows": 46,
+        "positive_labels": 39
+      },
+      "deny": {
+        "rows": 127,
+        "positive_labels": 118
+      }
+    }
+  },
   "ml_failure_count": 46,
   "first_12_ml_failures": [
     {
