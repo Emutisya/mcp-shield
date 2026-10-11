@@ -7,7 +7,6 @@ name = "mcp-shield"
 version = "0.1.0"
 description = "Offline synthetic MCP metadata risk inspection with explainable classical ML"
 requires-python = ">=3.10"
-license = {text = "MIT"}
 dependencies = []
 
 [project.scripts]

@@ -8,7 +8,6 @@ an advisory **allow, review, or deny** decision, combining a learned behavioral
 classifier with explicit safety policy and feature-level explanations.
 
 [![CI](https://github.com/Emutisya/mcp-shield/actions/workflows/ci.yml/badge.svg)](https://github.com/Emutisya/mcp-shield/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## The invention thesis
 
@@ -259,5 +258,5 @@ No dates or fabricated adoption metrics.
 split integrity, real HTTP inference and errors. `.github\workflows\ci.yml`:
 stdlib tests and CLI smoke tests on Python 3.10/3.12/3.13.
 
-MIT licensed. Contributions should use safe fictional fixtures, document
+Contributions should use safe fictional fixtures, document
 assumptions and failures, and never add live exploit payloads or credentials.
