@@ -45,7 +45,11 @@ def main():
             value = json.loads(Path(args.input).read_text(encoding="utf-8"))
             print(json.dumps(inspect(value, load_model(args.model)), indent=2))
         else:
-            server = make_server(load_model(args.model), args.port)
+            model = load_model(args.model)
+            try:
+                server = make_server(model, args.port)
+            except OSError:
+                parser.exit(2, f"Error: Could not start the local simulator on port {args.port}. Choose another --port or use --port 0 for an available port.\n")
             print(f"Offline simulator at http://127.0.0.1:{server.server_port} (Ctrl+C to stop)", flush=True)
             try:
                 server.serve_forever()

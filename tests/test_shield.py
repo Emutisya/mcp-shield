@@ -5,6 +5,8 @@ import math
 import subprocess
 import sys
 import threading
+import socket
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -157,6 +159,23 @@ class ShieldTests(unittest.TestCase):
                 self.assertIn("use 0 to choose an available port", result.stderr)
                 self.assertNotIn("Traceback", result.stderr)
                 self.assertEqual(result.stdout, "")
+
+    def test_cli_occupied_port_has_actionable_recovery(self):
+        with tempfile.TemporaryDirectory() as directory, socket.socket() as listener:
+            path = Path(directory) / "model.json"
+            path.write_text(json.dumps(self.model), encoding="utf-8")
+            listener.bind(("127.0.0.1", 0))
+            listener.listen()
+            port = listener.getsockname()[1]
+            result = subprocess.run(
+                [sys.executable, "-m", "mcp_shield", "serve", "--model", str(path), "--port", str(port)],
+                cwd=ROOT, text=True, capture_output=True, timeout=10,
+            )
+        self.assertEqual(result.returncode, 2)
+        self.assertIn(f"port {port}", result.stderr)
+        self.assertIn("--port 0", result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+        self.assertEqual(result.stdout, "")
 
     def test_local_http_inference_and_errors(self):
         server = make_server(self.model, 0)
