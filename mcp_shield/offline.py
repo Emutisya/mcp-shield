@@ -5,7 +5,7 @@ import hashlib
 import math
 from pathlib import Path
 
-from .core import inspect, unique_fields, validate, validate_model
+from .core import FEATURES, features, inspect, unique_fields, validate, validate_model
 
 WARNING = "Offline synthetic simulation only; observations are caller supplied, not independently verified."
 MAX_BATCH = 100
@@ -72,3 +72,17 @@ def compare_models(before, after):
                           "present_log_odds_delta": round(y["present_log_odds"] - x["present_log_odds"], 12),
                           "absent_log_odds_delta": round(y["absent_log_odds"] - x["absent_log_odds"], 12)}
                          for x, y in zip(a["features"], b["features"])]}
+
+
+def compare_observations(values, model):
+    if not isinstance(values, list) or len(values) != 2:
+        raise ValueError("Comparison requires exactly two complete synthetic observations.")
+    batch = inspect_batch(values, model)
+    a, b = batch["results"]
+    x, y = (features(v) for v in values)
+    return {"warning": WARNING, "model_sha256": batch["model_sha256"],
+            "observation_sha256": batch["observation_sha256"], "before": a, "after": b,
+            "probability_delta": b["uncalibrated_ml_probability"] - a["uncalibrated_ml_probability"],
+            "changed_features": [name for name, left, right in zip(FEATURES, x, y) if left != right],
+            "added_gates": sorted(set(b["gates"]) - set(a["gates"])),
+            "removed_gates": sorted(set(a["gates"]) - set(b["gates"]))}

@@ -87,3 +87,17 @@ class OfflineTests(unittest.TestCase):
             with patch.object(Path, "open", return_value=io.BytesIO(raw)):
                 with self.assertRaises(ValueError):
                     load_model("unused")
+
+    def test_scenario_comparison_separates_metadata_and_feature_changes(self):
+        from mcp_shield.offline import compare_observations
+        changed = copy.deepcopy(self.sample)
+        changed["server"]["name"] = "Another fictional server"
+        result = compare_observations([self.sample, changed], self.model)
+        self.assertEqual(result["changed_features"], [])
+        self.assertEqual(result["probability_delta"], 0)
+        changed["signals"]["scope_violation"] = True
+        result = compare_observations([self.sample, changed], self.model)
+        self.assertEqual(result["added_gates"], ["scope_violation"])
+        self.assertEqual(result["after"]["decision"], "deny")
+        with self.assertRaises(ValueError):
+            compare_observations([self.sample], self.model)

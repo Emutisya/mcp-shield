@@ -7,7 +7,7 @@ from pathlib import Path
 from .core import inspect, load_model, train, unique_fields
 from .data import dataset, split
 from .evaluation import evaluate
-from .offline import compare_models, inspect_batch, model_info, read_document, receipt
+from .offline import compare_models, compare_observations, inspect_batch, model_info, read_document, receipt
 from .server import MAX_BODY, make_server
 
 
@@ -48,6 +48,9 @@ def main():
     comparison = sub.add_parser("compare-models", help="Compare two validated local model artifacts")
     comparison.add_argument("before")
     comparison.add_argument("after")
+    scenario = sub.add_parser("compare", help="Compare exactly two synthetic observations, not remediation advice")
+    scenario.add_argument("input")
+    scenario.add_argument("--model", default="models/baseline.model.json")
     s = sub.add_parser("serve", help="Serve local dashboard and real model inference")
     s.add_argument("--model", default="models/baseline.model.json")
     s.add_argument("--port", type=int, default=8765)
@@ -74,6 +77,8 @@ def main():
             value = json.loads(raw.decode("utf-8"), object_pairs_hook=unique_fields)
             operation = receipt if args.receipt else inspect
             print(json.dumps(operation(value, load_model(args.model)), indent=2))
+        elif args.command == "compare":
+            print(json.dumps(compare_observations(read_document(args.input), load_model(args.model)), indent=2))
         elif args.command == "compare-models":
             print(json.dumps(compare_models(load_model(args.before), load_model(args.after)), indent=2))
         elif args.command == "model-info":

@@ -117,6 +117,9 @@ including prior, training-row count and present/absent feature log-odds deltas.
 It does not conclude that a changed model is better, safer or calibrated.
 Model loading is bounded to 65,536 UTF-8 bytes and rejects duplicate or unknown
 artifact fields. Unsupported metadata cannot masquerade as model certification.
+`compare pair.json` takes exactly two complete synthetic observations and shows
+both advisory verdicts, feature changes, probability delta and added/removed gates.
+This is a simulation comparison, not advice to suppress genuine observations.
 
 ### Run alongside the other projects
 
