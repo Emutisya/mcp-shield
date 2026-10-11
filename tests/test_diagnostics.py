@@ -111,3 +111,10 @@ class DiagnosticTests(unittest.TestCase):
         self.assertEqual(pair["phi"], 1)
         self.assertEqual(pair["cells_00_01_10_11"], [1, 0, 0, 1])
         self.assertTrue(all(r["phi"] is None for r in result if r["label"] == 1))
+
+    def test_ranking_awards_half_credit_for_ties_and_preserves_undefined_auc(self):
+        from mcp_shield.diagnostics import ranking_diagnostics
+        self.assertEqual(ranking_diagnostics([{"label": 0, "score": .5}, {"label": 1, "score": .5}])["roc_auc"], .5)
+        self.assertEqual(ranking_diagnostics([{"label": 0, "score": 0}, {"label": 1, "score": 1}])["roc_auc"], 1)
+        self.assertEqual(ranking_diagnostics([{"label": 0, "score": 1}, {"label": 1, "score": 0}])["roc_auc"], 0)
+        self.assertIsNone(ranking_diagnostics([{"label": 1, "score": .5}])["roc_auc"])

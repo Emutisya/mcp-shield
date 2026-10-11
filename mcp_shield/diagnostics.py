@@ -75,3 +75,20 @@ def feature_dependence(rows):
                                "cells_00_01_10_11": cells,
                                "phi": round((n11 * n00 - n10 * n01) / denominator, 4) if denominator else None})
     return result
+
+
+def ranking_diagnostics(rows):
+    labelled_scores(rows)
+    groups = {}
+    for r in rows:
+        group = groups.setdefault(r["score"], [0, 0])
+        group[r["label"]] += 1
+    negatives_before = wins = ties = 0
+    for _, (negative, positive) in sorted(groups.items()):
+        wins += positive * negatives_before
+        ties += positive * negative
+        negatives_before += negative
+    positives = sum(r["label"] for r in rows)
+    pairs = positives * (len(rows) - positives)
+    return {"positive_negative_pairs": pairs, "correctly_ordered_pairs": wins, "tied_pairs": ties,
+            "roc_auc": round((wins + .5 * ties) / pairs, 12) if pairs else None}

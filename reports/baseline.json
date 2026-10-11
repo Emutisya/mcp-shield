@@ -1429,6 +1429,12 @@
       "phi": -0.2224
     }
   ],
+  "ranking": {
+    "positive_negative_pairs": 39744,
+    "correctly_ordered_pairs": 38264,
+    "tied_pairs": 116,
+    "roc_auc": 0.964221014493
+  },
   "gate_count_histogram": {
     "0": 244,
     "1": 103,

@@ -183,6 +183,9 @@ Training feature-dependence diagnostics show class-conditioned 2×2 counts and
 phi coefficients for every feature pair, making the naive independence assumption
 inspectable. Constant or absent-class denominators remain null. No model fitting
 or held-out threshold selection uses this descriptive table.
+Ranking diagnostics report positive/negative pair counts, correctly ordered and
+tied pairs, and tie-aware ROC AUC. AUC is undefined for a single-class sample.
+It describes synthetic score ordering, not calibration or real-world detection.
 
 ### Run alongside the other projects
 
