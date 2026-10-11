@@ -33,8 +33,18 @@ def inspect_batch(values, model):
     return {"warning": WARNING, "rows": len(results), "results": results,
             "model_sha256": fingerprint(validate_model(model)),
             "observation_sha256": [fingerprint(value) for value in values],
+            "feature_groups": feature_groups(values, results),
             "decisions": {d: sum(r["decision"] == d for r in results)
                           for d in ("allow", "review", "deny")}}
+
+
+def feature_groups(values, results):
+    vectors = [features(v) for v in values]
+    return {name: {str(present): {
+        "rows": sum(vector[j] == present for vector in vectors),
+        "decisions": {d: sum(vector[j] == present and result["decision"] == d
+                             for vector, result in zip(vectors, results)) for d in ("allow", "review", "deny")},
+    } for present in (0, 1)} for j, name in enumerate(FEATURES)}
 
 
 def fingerprint(value):

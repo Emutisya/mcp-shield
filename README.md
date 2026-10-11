@@ -144,6 +144,9 @@ without inference or model loading. Exit status 1 means invalid observations,
 Metadata rejects isolated UTF-16 surrogate code points and C1/DEL controls,
 including JSON-escaped forms. Ordinary Unicode scalar text remains accepted;
 acceptance does not imply language-model coverage.
+Batch `feature_groups` breaks advisory decisions down by presence and absence of
+each feature, retaining empty groups. These counts are descriptive synthetic
+cohort summaries, not validated detections or population estimates.
 
 ### Run alongside the other projects
 

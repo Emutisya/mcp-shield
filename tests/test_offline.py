@@ -182,3 +182,15 @@ class OfflineTests(unittest.TestCase):
                 validate(value)
         value["server"]["name"] = "Fictional café 🌿"
         self.assertEqual(validate(value), value)
+
+    def test_batch_feature_groups_reconcile_and_preserve_absent_groups(self):
+        denied = copy.deepcopy(self.sample)
+        denied["signals"]["credential_request"] = True
+        result = inspect_batch([self.sample, denied], self.model)
+        groups = result["feature_groups"]
+        self.assertEqual(groups["credential_request"]["1"]["decisions"]["deny"], 1)
+        self.assertEqual(groups["scope_violation"]["1"]["rows"], 0)
+        for group in groups.values():
+            self.assertEqual(sum(g["rows"] for g in group.values()), 2)
+            for d, count in result["decisions"].items():
+                self.assertEqual(sum(g["decisions"][d] for g in group.values()), count)
