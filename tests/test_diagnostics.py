@@ -160,3 +160,15 @@ class DiagnosticTests(unittest.TestCase):
         b["ml"]["tp"] += 1
         with self.assertRaisesRegex(ValueError, "reconcile"):
             compare_reports(a, b)
+
+    def test_csv_predictions_preserve_counts_quote_text_and_neutralize_formulas(self):
+        import csv
+        import io
+        from mcp_shield.exports import predictions_csv
+        row = {"id": "=fictional", "family": "toy, family", "label": 1, "score": .5,
+               "ml_prediction": 1, "decision": "deny", "gates": ["scope_violation"], "review_triggers": []}
+        parsed = list(csv.DictReader(io.StringIO(predictions_csv([row]))))
+        self.assertEqual(parsed[0]["id"], "'=fictional")
+        self.assertEqual(parsed[0]["family"], row["family"])
+        self.assertEqual(parsed[0]["label"], "1")
+        self.assertIn("Synthetic", parsed[0]["boundary"])

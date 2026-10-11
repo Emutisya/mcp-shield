@@ -10,7 +10,7 @@ from .evaluation import compare_reports, evaluate, evaluate_seeds
 from .offline import compare_models, compare_observations, count_boundaries, inspect_batch, model_info, projection, read_document, receipt, representation_audit, sample_observations, sensitivity, validation_report
 from .server import MAX_BODY, make_server
 from .offline import gate_profile, replay_models
-from .exports import inspection_text
+from .exports import inspection_text, predictions_csv
 
 
 def write_output(path, text):
@@ -47,6 +47,7 @@ def main():
     e.add_argument("--output")
     e.add_argument("--seed", type=int, default=17)
     e.add_argument("--predictions", help="Export all synthetic held-out predictions without observation metadata")
+    e.add_argument("--predictions-format", choices=("json", "csv"), default="json")
     i = sub.add_parser("inspect", help="Inspect JSON metadata; never execute tools")
     i.add_argument("input")
     i.add_argument("--model", default="models/baseline.model.json")
@@ -120,8 +121,9 @@ def main():
             result = evaluate(args.seed, include_predictions=bool(args.predictions))
             if args.predictions:
                 rows = result.pop("predictions")
-                write_output(args.predictions, json.dumps({"data": result["data"], "seed": args.seed,
-                                                           "heldout_sha256": result["heldout_sha256"], "rows": rows}, indent=2) + "\n")
+                evidence = predictions_csv(rows) if args.predictions_format == "csv" else json.dumps(
+                    {"data": result["data"], "seed": args.seed, "heldout_sha256": result["heldout_sha256"], "rows": rows}, indent=2) + "\n"
+                write_output(args.predictions, evidence)
             report = json.dumps(result, indent=2) + "\n"
             if args.output:
                 write_output(args.output, report)

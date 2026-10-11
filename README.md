@@ -204,6 +204,10 @@ than presenting misleading improvement claims.
 creates a readable advisory report with all present/absent contributions and
 explicit simulation limits. JSON remains the default; receipts require JSON.
 Inspection output cannot overwrite the observation input or model.
+`evaluate --predictions reports\predictions.csv --predictions-format csv`
+exports a standard quoted CSV with numeric labels/scores and a synthetic-only
+boundary on every row. Formula-like text cells are neutralized for spreadsheet
+viewers; this does not change model inputs or predictions.
 
 ### Run alongside the other projects
 
