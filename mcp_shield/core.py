@@ -96,11 +96,12 @@ def load_model(path):
 def inspect(value, model):
     x = features(value)
     validate_model(model)
-    log_odds = math.log(model["prior"] / (1 - model["prior"]))
+    log_odds = math.log(model["prior"]) - math.log1p(-model["prior"])
     explanations = []
     for j, present in enumerate(x):
         benign, risky = (a[j] for a in model["probabilities"])
-        contribution = math.log(risky / benign) if present else math.log((1 - risky) / (1 - benign))
+        contribution = (math.log(risky) - math.log(benign) if present
+                        else math.log1p(-risky) - math.log1p(-benign))
         log_odds += contribution
         explanations.append({"feature": FEATURES[j], "present": bool(present),
                              "log_odds_contribution": round(contribution, 4)})

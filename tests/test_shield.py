@@ -1,6 +1,7 @@
 import copy
 import http.client
 import json
+import math
 import subprocess
 import sys
 import threading
@@ -69,6 +70,18 @@ class ShieldTests(unittest.TestCase):
             validate_model({**self.model, "prior": float("nan")})
         result = inspect(self.sample, self.model)
         self.assertEqual(len(result["contributions"]), len(features(self.sample)))
+        self.assertTrue(0 <= result["uncalibrated_ml_probability"] <= 1)
+
+    def test_extreme_valid_probabilities_keep_explanations_finite(self):
+        model = copy.deepcopy(self.model)
+        model["prior"] = 1e-320
+        model["probabilities"][0] = [.99] * len(model["features"])
+        model["probabilities"][1] = [1e-320] * len(model["features"])
+        item = copy.deepcopy(self.sample)
+        item["signals"]["verified_publisher"] = False
+        item["signals"]["metadata_changes"] = 1
+        result = inspect(item, model)
+        self.assertTrue(all(math.isfinite(row["log_odds_contribution"]) for row in result["contributions"]))
         self.assertTrue(0 <= result["uncalibrated_ml_probability"] <= 1)
 
     def test_training_labels_and_artifact_metadata_are_strict(self):
