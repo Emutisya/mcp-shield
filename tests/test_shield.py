@@ -154,6 +154,15 @@ class ShieldTests(unittest.TestCase):
             self.assertEqual(request("GET", "/", headers={"Host": "example.invalid"})[0], 403)
             self.assertEqual(request("POST", "/api/inspect", "{}")[0], 415)
             self.assertEqual(request("GET", "/missing")[0], 404)
+            connection = http.client.HTTPConnection("127.0.0.1", server.server_port, timeout=8)
+            try:
+                connection.request("POST", "/api/inspect", "{}", {**headers, "Content-Length": "100"})
+                response = connection.getresponse()
+                self.assertEqual(response.status, 408)
+                self.assertIn("timed out", json.loads(response.read())["error"])
+            finally:
+                connection.close()
+            self.assertEqual(request("GET", "/health")[0], 200)
         finally:
             server.shutdown()
             server.server_close()

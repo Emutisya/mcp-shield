@@ -129,7 +129,7 @@ footer { margin: 24px 0 0; border-top: 1px solid var(--cp-border); padding-top: 
 <button class="primary" id="inspect" type="button">Run local inspection →</button>
 <div id="error" role="alert"></div>
 </section>
-<section class="card" aria-live="polite" aria-atomic="true">
+<section class="card" aria-live="polite" aria-atomic="true" aria-busy="false" id="result-region">
 <div class="step">02 / DECISION SUPPORT</div><h2>Policy verdict</h2>
 <div id="decision" class="decision">Awaiting inspection</div>
 <div class="score" id="score">—</div>
@@ -147,18 +147,37 @@ footer { margin: 24px 0 0; border-top: 1px solid var(--cp-border); padding-top: 
 <script>
 const base = {server:{name:"fictional-library",publisher:"Local demo lab"},tool:{name:"catalog",description:"List public book titles from a fictional catalog."},signals:{credential_request:false,scope_violation:false,hidden_instruction:false,unapproved_network:false,verified_publisher:true,metadata_changes:0,unexpected_calls:0,response_bytes:1024}};
 const payload = document.getElementById("payload");
+const run = document.getElementById("inspect");
+const region = document.getElementById("result-region");
+let generation = 0, pending = null;
+function invalidate() {
+  generation++;
+  if (pending) pending.abort();
+  pending = null;
+  run.disabled = false;
+  region.setAttribute("aria-busy", "false");
+  document.getElementById("error").textContent = "";
+  document.getElementById("decision").textContent = "Awaiting inspection";
+  document.getElementById("decision").className = "decision";
+  document.getElementById("score").textContent = "—";
+  document.getElementById("fill").style.width = "0%";
+  document.getElementById("reasons").replaceChildren();
+  document.getElementById("features").replaceChildren();
+}
 function preset(name) {
   const value = JSON.parse(JSON.stringify(base));
   if (name === "drift") value.signals.metadata_changes = 2;
   if (name === "gate") value.signals.credential_request = true;
   if (name === "unknown") value.signals.verified_publisher = false;
   payload.value = JSON.stringify(value, null, 2);
+  invalidate();
 }
 document.querySelectorAll("[data-preset]").forEach(button => button.addEventListener("click", () => preset(button.dataset.preset)));
 preset("catalog");
-const run = document.getElementById("inspect");
+payload.addEventListener("input", invalidate);
 run.addEventListener("click", async () => {
-  document.getElementById("error").textContent = "";
+  invalidate();
+  const version = generation;
   document.getElementById("decision").textContent = "Inspecting…";
   document.getElementById("decision").className = "decision";
   document.getElementById("score").textContent = "—";
@@ -166,10 +185,13 @@ run.addEventListener("click", async () => {
   document.getElementById("reasons").replaceChildren();
   document.getElementById("features").replaceChildren();
   run.disabled = true;
+  region.setAttribute("aria-busy", "true");
   try {
     const body = JSON.stringify(JSON.parse(payload.value));
-    const response = await fetch("/api/inspect", {method:"POST",headers:{"Content-Type":"application/json"},body,signal:AbortSignal.timeout(10000)});
+    pending = new AbortController();
+    const response = await fetch("/api/inspect", {method:"POST",headers:{"Content-Type":"application/json"},body,signal:AbortSignal.any([pending.signal,AbortSignal.timeout(10000)])});
     const result = await response.json();
+    if (version !== generation) return;
     if (!response.ok) throw new Error(result.error || "Inspection failed.");
     const verdict = document.getElementById("decision");
     verdict.textContent = result.decision;
@@ -185,10 +207,14 @@ run.addEventListener("click", async () => {
       table.appendChild(row);
     });
   } catch(error) {
+    if (version !== generation) return;
     document.getElementById("decision").textContent = "No verdict";
-    document.getElementById("error").textContent = error.message + " If unavailable, start the Python server and open http://127.0.0.1:8765.";
-  } finally { run.disabled = false; }
+    document.getElementById("error").textContent = (error.name === "TimeoutError" ? "The local inspection request timed out." : error.message) + " Check the Python server and try again.";
+  } finally {
+    if (version === generation) { run.disabled = false; pending = null; region.setAttribute("aria-busy", "false"); }
+  }
 });
+window.addEventListener("pagehide", invalidate);
 </script>
 </body>
 </html>
