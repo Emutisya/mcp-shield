@@ -205,6 +205,68 @@
       }
     }
   },
+  "threshold_sweep": [
+    {
+      "threshold": 0,
+      "tp": 184,
+      "fp": 216,
+      "tn": 0,
+      "fn": 0,
+      "accuracy": 0.46,
+      "precision": 0.46,
+      "recall": 1.0
+    },
+    {
+      "threshold": 0.25,
+      "tp": 174,
+      "fp": 47,
+      "tn": 169,
+      "fn": 10,
+      "accuracy": 0.8575,
+      "precision": 0.7873,
+      "recall": 0.9457
+    },
+    {
+      "threshold": 0.5,
+      "tp": 157,
+      "fp": 19,
+      "tn": 197,
+      "fn": 27,
+      "accuracy": 0.885,
+      "precision": 0.892,
+      "recall": 0.8533
+    },
+    {
+      "threshold": 0.65,
+      "tp": 148,
+      "fp": 8,
+      "tn": 208,
+      "fn": 36,
+      "accuracy": 0.89,
+      "precision": 0.9487,
+      "recall": 0.8043
+    },
+    {
+      "threshold": 0.75,
+      "tp": 140,
+      "fp": 6,
+      "tn": 210,
+      "fn": 44,
+      "accuracy": 0.875,
+      "precision": 0.9589,
+      "recall": 0.7609
+    },
+    {
+      "threshold": 1,
+      "tp": 0,
+      "fp": 0,
+      "tn": 216,
+      "fn": 184,
+      "accuracy": 0.54,
+      "precision": null,
+      "recall": 0.0
+    }
+  ],
   "limitations": [
     "All numbers measure toy synthetic distributions, not real-world detection.",
     "Signal provenance is trusted; unseen attacks and dishonest signals can pass.",

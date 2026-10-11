@@ -24,6 +24,7 @@ def metrics(pairs):
 
 
 def evaluate(seed=17):
+    from .diagnostics import threshold_sweep
     training, heldout = split(dataset(seed))
     model = train(training)
     results = [(r, inspect(r["input"], model)) for r in heldout]
@@ -55,6 +56,8 @@ def evaluate(seed=17):
             "policy_decisions": {d: sum(p["decision"] == d for _, p in results) for d in ("allow", "review", "deny")},
             "ml_failure_count": len(failures), "first_12_ml_failures": failures[:12],
             "per_family": per_family,
+            "threshold_sweep": threshold_sweep([{"label": r["label"], "score": p["uncalibrated_ml_probability"]}
+                                                for r, p in results]),
             "limitations": [
                 "All numbers measure toy synthetic distributions, not real-world detection.",
                 "Signal provenance is trusted; unseen attacks and dishonest signals can pass.",

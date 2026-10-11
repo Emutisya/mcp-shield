@@ -93,6 +93,10 @@ portable reports across Python/libm versions. Classification and policy threshol
 always use full precision, so a displayed score can round onto a threshold without
 changing its underlying classification.
 
+The evaluation report includes a fixed descriptive ML threshold sweep (0, .25,
+.5, .65, .75, 1). Scores equal to a threshold count positive. These held-out
+diagnostics do not select thresholds, tune the model, or alter hard gates.
+
 ### Run alongside the other projects
 
 Every project defaults to port 8765. To run all four at once, keep MCP Shield on
