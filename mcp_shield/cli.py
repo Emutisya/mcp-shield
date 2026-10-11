@@ -1,11 +1,28 @@
 import argparse
 import json
+import os
+import tempfile
 from pathlib import Path
 
 from .core import inspect, load_model, train
 from .data import dataset, split
 from .evaluation import evaluate
 from .server import make_server
+
+
+def write_output(path, text):
+    target = Path(path)
+    target.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile("w", encoding="utf-8", dir=target.parent,
+                                         prefix=f".{target.name}.", suffix=".tmp", delete=False) as stream:
+            temporary = Path(stream.name)
+            stream.write(text)
+        os.replace(temporary, target)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 
 def main():
@@ -31,15 +48,12 @@ def main():
             rows, _ = split(dataset(args.seed))
             result = train(rows)
             target = Path(args.output)
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")
+            write_output(target, json.dumps(result, indent=2) + "\n")
             print(f"Trained {len(rows)} synthetic rows -> {target}")
         elif args.command == "evaluate":
             report = json.dumps(evaluate(args.seed), indent=2) + "\n"
             if args.output:
-                target = Path(args.output)
-                target.parent.mkdir(parents=True, exist_ok=True)
-                target.write_text(report, encoding="utf-8")
+                write_output(args.output, report)
             print(report)
         elif args.command == "inspect":
             value = json.loads(Path(args.input).read_text(encoding="utf-8"))

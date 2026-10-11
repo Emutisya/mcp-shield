@@ -190,6 +190,19 @@ class ShieldTests(unittest.TestCase):
                 self.assertNotIn("Traceback", result.stderr)
                 self.assertEqual(result.stdout, "")
 
+    def test_failed_output_replacement_preserves_artifact_and_cleans_temporary_file(self):
+        from mcp_shield.cli import write_output
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "model.json"
+            path.write_text(json.dumps(self.model), encoding="utf-8")
+            with patch("mcp_shield.cli.os.replace", side_effect=PermissionError("Isolated write failure")):
+                with self.assertRaises(PermissionError):
+                    write_output(path, '{"incomplete": true}')
+            self.assertEqual(json.loads(path.read_text(encoding="utf-8")), self.model)
+            self.assertEqual(list(Path(directory).glob("*.tmp")), [])
+            write_output(path, '{"replacement": true}')
+            self.assertEqual(json.loads(path.read_text(encoding="utf-8")), {"replacement": True})
+
     def test_cli_occupied_port_has_actionable_recovery(self):
         with tempfile.TemporaryDirectory() as directory, socket.socket() as listener:
             path = Path(directory) / "model.json"
