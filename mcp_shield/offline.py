@@ -167,3 +167,12 @@ def representation_audit(rows):
             "training_mixed_label_vectors": sum(len(labels) > 1 for labels in groups[0].values()),
             "heldout_mixed_label_vectors": sum(len(labels) > 1 for labels in groups[1].values()),
             "boundary": "Binary representation overlap is intentional; mixed toy labels show information the features cannot resolve."}
+
+
+def sample_observations(family, count=10, seed=17):
+    from .data import FAMILIES, dataset
+    if family not in {row[0] for row in FAMILIES}:
+        raise ValueError("Choose a declared synthetic family.")
+    if type(count) is not int or not 1 <= count <= MAX_BATCH:
+        raise ValueError(f"Sample count must be 1 to {MAX_BATCH}.")
+    return [row["input"] for row in dataset(seed, count) if row["family"] == family]

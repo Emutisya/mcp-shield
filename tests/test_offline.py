@@ -203,3 +203,13 @@ class OfflineTests(unittest.TestCase):
         self.assertEqual(result["shared_feature_vectors"], 1)
         self.assertEqual(result["training_mixed_label_vectors"], 1)
         self.assertEqual(result["heldout_mixed_label_vectors"], 1)
+
+    def test_bounded_sample_generation_is_batch_compatible_and_reproducible(self):
+        from mcp_shield.offline import sample_observations, validation_report
+        samples = sample_observations("school", 5)
+        self.assertEqual(samples, sample_observations("school", 5))
+        self.assertEqual(validation_report(samples)["valid_rows"], 5)
+        self.assertTrue(all("Synthetic case" in v["tool"]["description"] for v in samples))
+        for family, count in (("unknown", 1), ("school", 0), ("school", 101), ("school", True)):
+            with self.assertRaises(ValueError):
+                sample_observations(family, count)

@@ -7,7 +7,7 @@ from pathlib import Path
 from .core import inspect, load_model, train, unique_fields
 from .data import dataset, split
 from .evaluation import evaluate
-from .offline import compare_models, compare_observations, count_boundaries, inspect_batch, model_info, projection, read_document, receipt, representation_audit, sensitivity, validation_report
+from .offline import compare_models, compare_observations, count_boundaries, inspect_batch, model_info, projection, read_document, receipt, representation_audit, sample_observations, sensitivity, validation_report
 from .server import MAX_BODY, make_server
 
 
@@ -63,6 +63,11 @@ def main():
     validation.add_argument("input")
     audit = sub.add_parser("audit-data", help="Audit synthetic feature collisions and mixed labels")
     audit.add_argument("--seed", type=int, default=17)
+    samples = sub.add_parser("samples", help="Generate bounded fictional observation fixtures for batch inspection")
+    samples.add_argument("--family", required=True)
+    samples.add_argument("--count", type=int, default=10)
+    samples.add_argument("--seed", type=int, default=17)
+    samples.add_argument("--output")
     s = sub.add_parser("serve", help="Serve local dashboard and real model inference")
     s.add_argument("--model", default="models/baseline.model.json")
     s.add_argument("--port", type=int, default=8765)
@@ -89,6 +94,11 @@ def main():
             value = json.loads(raw.decode("utf-8"), object_pairs_hook=unique_fields)
             operation = receipt if args.receipt else inspect
             print(json.dumps(operation(value, load_model(args.model)), indent=2))
+        elif args.command == "samples":
+            report = json.dumps(sample_observations(args.family, args.count, args.seed), indent=2) + "\n"
+            if args.output:
+                write_output(args.output, report)
+            print(report)
         elif args.command == "audit-data":
             print(json.dumps(representation_audit(dataset(args.seed)), indent=2))
         elif args.command == "validate":
