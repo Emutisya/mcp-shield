@@ -6,7 +6,7 @@ from pathlib import Path
 
 from .core import inspect, load_model, train, unique_fields
 from .data import dataset, split
-from .evaluation import evaluate
+from .evaluation import evaluate, evaluate_seeds
 from .offline import compare_models, compare_observations, count_boundaries, inspect_batch, model_info, projection, read_document, receipt, representation_audit, sample_observations, sensitivity, validation_report
 from .server import MAX_BODY, make_server
 from .offline import gate_profile, replay_models
@@ -86,6 +86,9 @@ def main():
     gates = sub.add_parser("gates", help="Simulate all sixteen hard-gate combinations")
     gates.add_argument("input")
     gates.add_argument("--model", default="models/baseline.model.json")
+    seeds = sub.add_parser("evaluate-seeds", help="Repeat fixed synthetic experiments without selecting a model")
+    seeds.add_argument("--seeds", nargs="+", type=int, required=True)
+    seeds.add_argument("--output")
     s = sub.add_parser("serve", help="Serve local dashboard and real model inference")
     s.add_argument("--model", default="models/baseline.model.json")
     s.add_argument("--port", type=int, default=8765)
@@ -121,6 +124,11 @@ def main():
             value = json.loads(raw.decode("utf-8"), object_pairs_hook=unique_fields)
             operation = receipt if args.receipt else inspect
             print(json.dumps(operation(value, load_model(args.model)), indent=2))
+        elif args.command == "evaluate-seeds":
+            report = json.dumps(evaluate_seeds(args.seeds), indent=2) + "\n"
+            if args.output:
+                write_output(args.output, report)
+            print(report)
         elif args.command == "gates":
             print(json.dumps(gate_profile(read_document(args.input, MAX_BODY), load_model(args.model)), indent=2))
         elif args.command == "replay":

@@ -108,3 +108,18 @@ def evaluate(seed=17, include_predictions=False):
                                   "decision": p["decision"], "gates": p["gates"],
                                   "review_triggers": p["review_triggers"]} for r, p in results]
     return report
+
+
+def evaluate_seeds(seeds):
+    if (not isinstance(seeds, list) or not 1 <= len(seeds) <= 10
+            or any(type(seed) is not int for seed in seeds) or len(set(seeds)) != len(seeds)):
+        raise ValueError("Supply 1–10 distinct integer seeds.")
+    reports = [evaluate(seed) for seed in seeds]
+    runs = [{"seed": r["seed"], "training_sha256": r["training_sha256"], "heldout_sha256": r["heldout_sha256"],
+             "ml": r["ml"], "policy": r["policy_nonallow_as_positive"], "decisions": r["policy_decisions"]}
+            for r in reports]
+    return {"data": "Repeated toy synthetic experiments only; families remain fixed.",
+            "runs": runs, "ml_accuracy_range": [min(r["ml"]["accuracy"] for r in reports),
+                                               max(r["ml"]["accuracy"] for r in reports)],
+            "limitations": ["Seeds are not independent real-world datasets or confidence intervals.",
+                            "No seed, model or threshold is selected using these results."]}

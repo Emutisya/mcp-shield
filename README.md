@@ -193,6 +193,9 @@ Toy-label Brier and log losses are compared with the learned training-prior
 probability baseline. Impossible endpoint predictions expose an infinite-loss
 row count and null overall log loss, not silently clipped probabilities.
 These descriptive losses do not establish calibration or real-world safety.
+`evaluate-seeds --seeds 17 18 19 --output reports\seed-runs.json` repeats up to ten
+distinct fixed-family synthetic experiments, preserving per-run hashes and
+metrics. Ranges are not confidence intervals; no winning seed/model is selected.
 
 ### Run alongside the other projects
 

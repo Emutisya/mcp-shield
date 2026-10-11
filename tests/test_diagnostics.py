@@ -136,3 +136,13 @@ class DiagnosticTests(unittest.TestCase):
         self.assertEqual(wrong["brier"], 1)
         self.assertIsNone(wrong["log_loss"])
         self.assertEqual(wrong["infinite_log_loss_rows"], 2)
+
+    def test_repeated_seeds_preserve_manifests_without_selecting_a_winner(self):
+        from mcp_shield.evaluation import evaluate_seeds
+        report = evaluate_seeds([17, 18])
+        self.assertEqual([r["seed"] for r in report["runs"]], [17, 18])
+        self.assertNotEqual(report["runs"][0]["heldout_sha256"], report["runs"][1]["heldout_sha256"])
+        self.assertNotIn("best_seed", report)
+        for seeds in ([], [17, 17], [True], list(range(11))):
+            with self.assertRaises(ValueError):
+                evaluate_seeds(seeds)
