@@ -82,6 +82,8 @@ installation. Models are locally generated in ignored `models\`.
 `train` and `evaluate` accept `--seed`; `serve` accepts `--port`.
 Missing or incompatible models produce a CLI error: run `train` first.
 
+### Offline analysis and exports
+
 `python -m mcp_shield batch observations.json --output reports\batch.json`
 inspects a JSON array of 1–100 synthetic observations. The entire bounded UTF-8
 document is validated before inference; invalid items identify their zero-based
@@ -286,6 +288,12 @@ Split validation rejects exact canonical observation copies across training and
 held-out partitions even if their IDs/families differ, and validates all source
 schemas and labels. Distinct observations with shared binary feature vectors remain
 allowed; source-disjointness is not independent telemetry verification.
+Use the global `--json-errors` option **before** the command, for example
+`python -m mcp_shield --json-errors project invalid.json`. Argument errors emit
+`MSH_ARGUMENT_ERROR`; command/document failures emit `MSH_COMMAND_ERROR`, as a
+single JSON error on stderr with exit status 2. Normal successful output is
+unchanged. Schema-invalid `validate` reports still use their documented status 1
+and ordinary report body; all statuses are advisory, never execution authorization.
 
 ### Run alongside the other projects
 

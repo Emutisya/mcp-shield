@@ -385,3 +385,22 @@ class OfflineTests(unittest.TestCase):
         rows[-1]["label"] = True
         with self.assertRaisesRegex(ValueError, "binary integer"):
             split(rows)
+
+    def test_structured_cli_errors_distinguish_arguments_from_document_failures(self):
+        import io
+        from contextlib import redirect_stderr, redirect_stdout
+        from mcp_shield.cli import main
+        for argv, expected in ((["shield", "--json-errors", "unknown-command"], "MSH_ARGUMENT_ERROR"),
+                               (["shield", "--json-errors", "project", "unused"], "MSH_COMMAND_ERROR")):
+            errors = io.StringIO()
+            with patch("sys.argv", argv), patch("mcp_shield.cli.read_document", return_value={}), redirect_stderr(errors):
+                with self.assertRaises(SystemExit) as exit:
+                    main()
+            self.assertEqual(exit.exception.code, 2)
+            self.assertEqual(json.loads(errors.getvalue())["error"]["code"], expected)
+        output, errors = io.StringIO(), io.StringIO()
+        with patch("sys.argv", ["shield", "--json-errors", "project", "unused"]), \
+             patch("mcp_shield.cli.read_document", return_value=self.sample), redirect_stdout(output), redirect_stderr(errors):
+            main()
+        self.assertIn("features", json.loads(output.getvalue()))
+        self.assertEqual(errors.getvalue(), "")

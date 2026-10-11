@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 import tempfile
+import sys
 from pathlib import Path
 
 from .core import inspect, load_model, train, unique_fields
@@ -13,6 +14,23 @@ from .offline import check_model_identity, gate_profile, replay_models, training
 from .exports import batch_jsonlines, evaluation_text, inspection_text, predictions_csv
 from .offline import model_stability, prepare_review, read_jsonlines, reproduce_receipt
 from .offline import compare_scenarios
+
+
+class ShieldArgumentParser(argparse.ArgumentParser):
+    def error(self, message):
+        if "--json-errors" in sys.argv[1:]:
+            self._print_message(json.dumps({"error": {"code": "MSH_ARGUMENT_ERROR", "message": message}}) + "\n", sys.stderr)
+            super().exit(2)
+        else:
+            super().error(message)
+
+    def exit(self, status=0, message=None):
+        if status and message and "--json-errors" in sys.argv[1:]:
+            detail = message.removeprefix("Error: ").strip()
+            self._print_message(json.dumps({"error": {"code": "MSH_COMMAND_ERROR", "message": detail}}) + "\n", sys.stderr)
+            super().exit(status)
+        else:
+            super().exit(status, message)
 
 
 def write_output(path, text):
@@ -40,7 +58,8 @@ def validate_outputs(sources, outputs):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="MCP Shield offline synthetic inspection simulator")
+    parser = ShieldArgumentParser(description="MCP Shield offline synthetic inspection simulator")
+    parser.add_argument("--json-errors", action="store_true", help="Emit one structured error on stderr; put before command")
     sub = parser.add_subparsers(dest="command", required=True)
     t = sub.add_parser("train", help="Train from reproducible synthetic training families only")
     t.add_argument("--output", default="models/baseline.model.json")
