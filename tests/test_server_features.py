@@ -44,3 +44,23 @@ class ServerFeatureTests(unittest.TestCase):
         self.assertEqual(health["model_sha256"], digest)
         self.assertEqual(self.request("POST", "/api/inspect", self.sample)[1]["decision"], "allow")
         self.assertEqual(self.request("GET", "/api/model")[1]["model_sha256"], digest)
+
+    def test_duplicate_boundary_headers_are_rejected_not_first_value_wins(self):
+        host = f"127.0.0.1:{self.server.server_port}"
+        for header, value, expected in (("Host", host, 403), ("Origin", f"http://{host}", 403),
+                                         ("Content-Type", "application/json", 415)):
+            connection = http.client.HTTPConnection("127.0.0.1", self.server.server_port, timeout=3)
+            connection.putrequest("POST", "/api/inspect", skip_host=True)
+            connection.putheader("Host", host)
+            if header != "Content-Type":
+                connection.putheader("Content-Type", "application/json")
+            connection.putheader(header, value)
+            if header != "Host":
+                connection.putheader(header, value)
+            connection.putheader("Content-Length", "2")
+            connection.endheaders(b"{}")
+            response = connection.getresponse()
+            self.assertEqual(response.status, expected)
+            self.assertIn("error", json.loads(response.read()))
+            connection.close()
+        self.assertEqual(self.request("GET", "/health")[0], 200)

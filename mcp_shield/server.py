@@ -44,11 +44,11 @@ def make_server(model, port=8765):
 
         def authorized(self):
             expected = f"127.0.0.1:{self.server.server_port}"
-            if self.headers.get("Host") != expected:
+            if len(self.headers.get_all("Host", [])) != 1 or self.headers.get("Host") != expected:
                 self.respond(403, json.dumps({"error": "Host must match the loopback server address."}))
                 return False
             origin = self.headers.get("Origin")
-            if origin is not None and origin != f"http://{expected}":
+            if len(self.headers.get_all("Origin", [])) > 1 or (origin is not None and origin != f"http://{expected}"):
                 self.respond(403, json.dumps({"error": "Cross-origin requests are not accepted."}))
                 return False
             return True
@@ -74,7 +74,8 @@ def make_server(model, port=8765):
             if self.path != "/api/inspect":
                 self.respond(404, '{"error":"Route not found."}')
                 return
-            if self.headers.get("Content-Type", "").split(";")[0].strip() != "application/json":
+            if (len(self.headers.get_all("Content-Type", [])) != 1
+                    or self.headers.get("Content-Type", "").split(";")[0].strip() != "application/json"):
                 self.respond(415, '{"error":"Use Content-Type: application/json."}')
                 return
             try:

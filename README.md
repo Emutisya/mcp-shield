@@ -242,6 +242,9 @@ The HTTP service snapshots its validated model at startup so external in-process
 mutation cannot silently change inference. `/health` identifies that model by
 unsigned content hash; `GET /api/model` exposes the same local parameter
 introspection as `model-info`, not authentication or verified provenance.
+Duplicate Host/Origin/Content-Type headers are rejected instead of selecting an
+ambiguous first value. Existing strict Content-Length and no-chunked-body rules
+still apply, and a rejected request does not disable subsequent local requests.
 
 ### Run alongside the other projects
 
