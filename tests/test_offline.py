@@ -235,3 +235,11 @@ class OfflineTests(unittest.TestCase):
         self.assertEqual(result["transitions"]["allow"]["review"], 1)
         self.assertEqual(result["transitions"]["deny"]["deny"], 1)
         self.assertEqual([r["index"] for r in result["rows"]], [0, 1])
+
+    def test_duplicate_audit_does_not_silently_reweight_batch(self):
+        renamed = copy.deepcopy(self.sample)
+        renamed["server"]["name"] = "Fictional second source"
+        report = inspect_batch([self.sample, renamed, self.sample], self.model)
+        self.assertEqual(report["duplicate_observations"]["unique_rows"], 2)
+        self.assertEqual(report["duplicate_observations"]["groups"][0]["indexes"], [0, 2])
+        self.assertEqual(report["decisions"]["allow"], 3)

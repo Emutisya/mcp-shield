@@ -166,6 +166,9 @@ prevent accidental source/model replacement, including hard-link aliases.
 `replay observations.json --before old.json --after new.json` compares model
 verdicts on the same bounded batch, exposing the complete decision-transition
 matrix. Explicit gates still deny under both models; no quality claim follows.
+Batch duplicate diagnostics expose canonical exact repeats and their indexes.
+They remain in decision totals; repeated observations are not independent evidence
+and distinct metadata with identical features is not treated as an exact repeat.
 
 ### Run alongside the other projects
 

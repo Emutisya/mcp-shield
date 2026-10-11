@@ -34,6 +34,7 @@ def inspect_batch(values, model):
             "model_sha256": fingerprint(validate_model(model)),
             "observation_sha256": [fingerprint(value) for value in values],
             "feature_groups": feature_groups(values, results),
+            "duplicate_observations": duplicate_observations(values),
             "decisions": {d: sum(r["decision"] == d for r in results)
                           for d in ("allow", "review", "deny")}}
 
@@ -45,6 +46,16 @@ def feature_groups(values, results):
         "decisions": {d: sum(vector[j] == present and result["decision"] == d
                              for vector, result in zip(vectors, results)) for d in ("allow", "review", "deny")},
     } for present in (0, 1)} for j, name in enumerate(FEATURES)}
+
+
+def duplicate_observations(values):
+    identities = {}
+    for index, value in enumerate(values):
+        identities.setdefault(fingerprint(value), []).append(index)
+    return {"unique_rows": len(identities),
+            "repeated_rows": len(values) - len(identities),
+            "groups": [{"sha256": identity, "indexes": indexes} for identity, indexes in identities.items() if len(indexes) > 1],
+            "boundary": "Duplicate rows remain in decision counts; repeated observations are not independent evidence."}
 
 
 def fingerprint(value):
