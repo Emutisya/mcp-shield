@@ -61,3 +61,14 @@ def model_info(model):
                 "present_log_odds": round(math.log(model["probabilities"][1][j]) - math.log(model["probabilities"][0][j]), 12),
                 "absent_log_odds": round(math.log1p(-model["probabilities"][1][j]) - math.log1p(-model["probabilities"][0][j]), 12),
             } for j, name in enumerate(model["features"])]}
+
+
+def compare_models(before, after):
+    a, b = model_info(before), model_info(after)
+    return {"warning": WARNING, "before_sha256": a["model_sha256"], "after_sha256": b["model_sha256"],
+            "training_rows_delta": after["training_rows"] - before["training_rows"],
+            "prior_delta": after["prior"] - before["prior"],
+            "features": [{"feature": x["feature"],
+                          "present_log_odds_delta": round(y["present_log_odds"] - x["present_log_odds"], 12),
+                          "absent_log_odds_delta": round(y["absent_log_odds"] - x["absent_log_odds"], 12)}
+                         for x, y in zip(a["features"], b["features"])]}

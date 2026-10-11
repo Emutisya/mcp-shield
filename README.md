@@ -112,6 +112,9 @@ content hashes, not publisher authentication or independent verification.
 `model-info --model models\baseline.model.json` exposes the learned prior,
 class-conditional probabilities and present/absent log-odds for all ten features.
 It validates the artifact before describing it and makes no authenticity claim.
+`compare-models before.json after.json` localizes learned-parameter changes,
+including prior, training-row count and present/absent feature log-odds deltas.
+It does not conclude that a changed model is better, safer or calibrated.
 
 ### Run alongside the other projects
 

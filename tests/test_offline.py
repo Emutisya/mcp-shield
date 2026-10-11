@@ -67,3 +67,13 @@ class OfflineTests(unittest.TestCase):
         self.assertEqual(result["training_rows"], 800)
         with self.assertRaises(ValueError):
             model_info({**self.model, "prior": 0})
+
+    def test_model_comparison_localizes_changed_parameters(self):
+        from mcp_shield.offline import compare_models
+        changed = copy.deepcopy(self.model)
+        changed["probabilities"][1][0] = .8
+        result = compare_models(self.model, changed)
+        self.assertNotEqual(result["before_sha256"], result["after_sha256"])
+        self.assertNotEqual(result["features"][0]["present_log_odds_delta"], 0)
+        self.assertTrue(all(r["present_log_odds_delta"] == 0 for r in result["features"][1:]))
+        self.assertEqual(compare_models(self.model, self.model)["prior_delta"], 0)
