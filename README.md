@@ -231,6 +231,9 @@ and count unknown fields without echoing arbitrary untrusted keys or values.
 Review-trigger diagnostics distinguish actual review rows from triggers beneath
 hard-deny precedence, expose exclusive review causes and benign toy-label burden.
 Triggers can overlap and must not be summed as independent human-review requests.
+Fixed ±.01 and ±.05 threshold neighborhoods count raw-score observations on
+either side of 0.5/0.65, including exact ties. These diagnose threshold proximity,
+not statistical uncertainty, confidence intervals or a recommendation to tune.
 
 ### Run alongside the other projects
 

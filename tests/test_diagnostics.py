@@ -194,3 +194,12 @@ class DiagnosticTests(unittest.TestCase):
             self.assertEqual(group["benign_review_labels"],
                              sum(r["decision"] == "review" and r["label"] == 0 for r in rows))
         self.assertTrue(any(g["under_hard_deny_rows"] for g in report["review_diagnostics"].values()))
+
+    def test_threshold_neighborhoods_keep_raw_sides_of_display_rounding(self):
+        from mcp_shield.diagnostics import threshold_neighborhoods
+        rows = [{"label": 1, "score": s} for s in (.49999999999999994, .5, .7)]
+        group = threshold_neighborhoods(rows)[0]
+        self.assertEqual(group["rows"], 2)
+        self.assertEqual(group["below_threshold"], 1)
+        self.assertEqual(group["at_or_above_threshold"], 1)
+        self.assertEqual(group["positive_labels"], 2)

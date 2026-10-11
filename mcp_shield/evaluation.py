@@ -32,6 +32,7 @@ def metrics(pairs):
 
 def evaluate(seed=17, include_predictions=False):
     from .diagnostics import classifier_policy_cross_tab, decision_burden, feature_dependence, feature_distribution, probability_losses, ranking_diagnostics, score_histogram, threshold_sweep
+    from .diagnostics import threshold_neighborhoods
     if type(include_predictions) is not bool:
         raise ValueError("include_predictions must be boolean.")
     training, heldout = split(dataset(seed))
@@ -90,6 +91,8 @@ def evaluate(seed=17, include_predictions=False):
                 for r, p in results]),
             "gate_diagnostics": gate_diagnostics,
             "review_diagnostics": review_diagnostics,
+            "threshold_neighborhoods": threshold_neighborhoods([{"label": r["label"], "score": p["uncalibrated_ml_probability"]}
+                                                                for r, p in results]),
             "feature_distribution": feature_distribution([r["input"] for r in training], [r["input"] for r in heldout]),
             "training_feature_dependence": feature_dependence(training),
             "ranking": ranking_diagnostics([{"label": r["label"], "score": p["uncalibrated_ml_probability"]} for r, p in results]),

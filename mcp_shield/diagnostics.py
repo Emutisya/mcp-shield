@@ -118,3 +118,13 @@ def probability_losses(rows):
             "log_loss": round(loss, 12) if loss is not None else None,
             "infinite_log_loss_rows": impossible,
             "boundary": "Toy-label probability losses only; no calibration is performed or established."}
+
+
+def threshold_neighborhoods(rows):
+    labelled_scores(rows)
+    return [{"threshold": threshold, "radius": radius,
+             "rows": sum(abs(r["score"] - threshold) <= radius for r in rows),
+             "below_threshold": sum(0 <= threshold - r["score"] <= radius and r["score"] < threshold for r in rows),
+             "at_or_above_threshold": sum(0 <= r["score"] - threshold <= radius for r in rows),
+             "positive_labels": sum(r["label"] for r in rows if abs(r["score"] - threshold) <= radius)}
+            for threshold in (.5, .65) for radius in (.01, .05)]

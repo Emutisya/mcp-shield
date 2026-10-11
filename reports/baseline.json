@@ -215,6 +215,40 @@
       "exclusive_review_rows": 21
     }
   },
+  "threshold_neighborhoods": [
+    {
+      "threshold": 0.5,
+      "radius": 0.01,
+      "rows": 0,
+      "below_threshold": 0,
+      "at_or_above_threshold": 0,
+      "positive_labels": 0
+    },
+    {
+      "threshold": 0.5,
+      "radius": 0.05,
+      "rows": 12,
+      "below_threshold": 3,
+      "at_or_above_threshold": 9,
+      "positive_labels": 4
+    },
+    {
+      "threshold": 0.65,
+      "radius": 0.01,
+      "rows": 1,
+      "below_threshold": 1,
+      "at_or_above_threshold": 0,
+      "positive_labels": 1
+    },
+    {
+      "threshold": 0.65,
+      "radius": 0.05,
+      "rows": 8,
+      "below_threshold": 3,
+      "at_or_above_threshold": 5,
+      "positive_labels": 7
+    }
+  ],
   "feature_distribution": {
     "credential_request": {
       "training_present": 89,
