@@ -88,6 +88,11 @@ document is validated before inference; invalid items identify their zero-based
 index, and no partial export is written. Results preserve input order and
 include advisory decision counts. This never connects to or executes tools.
 
+Evaluation failure scores are display values rounded to 12 decimal places for
+portable reports across Python/libm versions. Classification and policy thresholds
+always use full precision, so a displayed score can round onto a threshold without
+changing its underlying classification.
+
 ### Run alongside the other projects
 
 Every project defaults to port 8765. To run all four at once, keep MCP Shield on

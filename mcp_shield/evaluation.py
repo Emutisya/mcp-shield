@@ -28,7 +28,7 @@ def evaluate(seed=17):
     model = train(training)
     results = [(r, inspect(r["input"], model)) for r in heldout]
     failures = [{"id": r["id"], "label": r["label"], "decision": p["decision"],
-                 "score": p["uncalibrated_ml_probability"]}
+                 "score": round(p["uncalibrated_ml_probability"], 12)}
                 for r, p in results if (p["uncalibrated_ml_probability"] >= 0.5) != bool(r["label"])]
     per_family = {}
     for family in sorted({row["family"] for row, _ in results}):
@@ -48,6 +48,7 @@ def evaluate(seed=17):
             "train_families": sorted({r["family"] for r in training}),
             "test_families": sorted({r["family"] for r in heldout}),
             "ml_threshold": 0.5,
+            "display_score_decimal_places": 12,
             "ml": metrics([(r["label"], int(p["uncalibrated_ml_probability"] >= 0.5)) for r, p in results]),
             "always_benign_baseline": metrics([(r["label"], 0) for r in heldout]),
             "policy_nonallow_as_positive": metrics([(r["label"], int(p["decision"] != "allow")) for r, p in results]),

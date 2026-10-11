@@ -35,3 +35,14 @@ class OfflineTests(unittest.TestCase):
             with patch.object(Path, "open", return_value=io.BytesIO(raw)):
                 with self.assertRaises((ValueError, UnicodeError)):
                     read_document("unused", maximum=10)
+
+    def test_report_rounds_display_not_threshold_comparisons(self):
+        from mcp_shield.evaluation import evaluate
+        prediction = inspect(self.sample, self.model)
+        prediction["uncalibrated_ml_probability"] = .49999999999999994
+        with patch("mcp_shield.evaluation.inspect", return_value=prediction):
+            report = evaluate()
+        self.assertEqual(report["ml"]["tp"], 0)
+        self.assertEqual(report["ml"]["fn"], 184)
+        self.assertEqual(report["first_12_ml_failures"][0]["score"], .5)
+        self.assertEqual(report["display_score_decimal_places"], 12)
