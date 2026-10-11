@@ -15,3 +15,13 @@ class DiagnosticTests(unittest.TestCase):
                 threshold_sweep(self.rows, thresholds)
         with self.assertRaises(ValueError):
             threshold_sweep([{"label": True, "score": .5}])
+
+    def test_confusion_rates_preserve_undefined_denominators(self):
+        from mcp_shield.evaluation import metrics
+        result = metrics([(0, 0), (0, 1), (1, 0), (1, 1)])
+        for key in ("specificity", "false_positive_rate", "false_negative_rate", "f1", "balanced_accuracy"):
+            self.assertEqual(result[key], .5)
+        absent_positive = metrics([(0, 0)])
+        self.assertIsNone(absent_positive["balanced_accuracy"])
+        self.assertIsNone(absent_positive["f1"])
+        self.assertIsNone(metrics([(1, 1)])["specificity"])

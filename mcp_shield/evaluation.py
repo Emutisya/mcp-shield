@@ -18,6 +18,13 @@ def metrics(pairs):
     tn = sum(y == 0 and p == 0 for y, p in pairs)
     fn = sum(y == 1 and p == 0 for y, p in pairs)
     return {"tp": tp, "fp": fp, "tn": tn, "fn": fn,
+            "support": len(pairs), "positive_labels": tp + fn,
+            "specificity": round(tn / (tn + fp), 4) if tn + fp else None,
+            "false_positive_rate": round(fp / (tn + fp), 4) if tn + fp else None,
+            "false_negative_rate": round(fn / (tp + fn), 4) if tp + fn else None,
+            "f1": round(2 * tp / (2 * tp + fp + fn), 4) if 2 * tp + fp + fn else None,
+            "balanced_accuracy": round((tp / (tp + fn) + tn / (tn + fp)) / 2, 4)
+            if tp + fn and tn + fp else None,
             "accuracy": round((tp + tn) / len(pairs), 4),
             "precision": round(tp / (tp + fp), 4) if tp + fp else None,
             "recall": round(tp / (tp + fn), 4) if tp + fn else None}

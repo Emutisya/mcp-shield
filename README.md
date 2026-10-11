@@ -96,6 +96,9 @@ changing its underlying classification.
 The evaluation report includes a fixed descriptive ML threshold sweep (0, .25,
 .5, .65, .75, 1). Scores equal to a threshold count positive. These held-out
 diagnostics do not select thresholds, tune the model, or alter hard gates.
+Confusion summaries also expose support, positive-label counts, specificity,
+false-positive/negative rates, F1 and balanced accuracy. Undefined denominators
+remain JSON null rather than implying perfect performance.
 
 ### Run alongside the other projects
 
