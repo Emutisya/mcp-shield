@@ -9,7 +9,7 @@ from .data import dataset, split
 from .evaluation import compare_reports, evaluate, evaluate_seeds
 from .offline import compare_models, compare_observations, count_boundaries, inspect_batch, model_info, projection, read_document, receipt, representation_audit, sample_observations, sensitivity, validation_report
 from .server import MAX_BODY, make_server
-from .offline import gate_profile, replay_models
+from .offline import gate_profile, replay_models, training_manifest
 from .exports import evaluation_text, inspection_text, predictions_csv
 
 
@@ -43,6 +43,7 @@ def main():
     t = sub.add_parser("train", help="Train from reproducible synthetic training families only")
     t.add_argument("--output", default="models/baseline.model.json")
     t.add_argument("--seed", type=int, default=17)
+    t.add_argument("--manifest", help="Export unsigned synthetic training counts and content identities")
     e = sub.add_parser("evaluate", help="Retrain then evaluate on disjoint held-out synthetic families")
     e.add_argument("--output")
     e.add_argument("--seed", type=int, default=17)
@@ -104,7 +105,9 @@ def main():
     if args.command == "serve" and not 0 <= args.port <= 65535:
         parser.error("--port must be between 0 and 65535; use 0 to choose an available port.")
     try:
-        if args.command == "evaluate":
+        if args.command == "train":
+            validate_outputs([], [args.output, args.manifest])
+        elif args.command == "evaluate":
             validate_outputs([], [args.output, args.predictions])
         elif args.command == "batch":
             validate_outputs([args.input, args.model], [args.output])
@@ -117,6 +120,8 @@ def main():
             result = train(rows)
             target = Path(args.output)
             write_output(target, json.dumps(result, indent=2) + "\n")
+            if args.manifest:
+                write_output(args.manifest, json.dumps(training_manifest(rows, result, args.seed), indent=2) + "\n")
             print(f"Trained {len(rows)} synthetic rows -> {target}")
         elif args.command == "evaluate":
             result = evaluate(args.seed, include_predictions=bool(args.predictions))

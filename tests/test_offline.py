@@ -262,3 +262,15 @@ class OfflineTests(unittest.TestCase):
         self.assertIn("credential_request: absent", text)
         self.assertIn("not a safety guarantee", text)
         self.assertNotIn(self.sample["server"]["name"], text)
+
+    def test_training_manifest_reconstructs_learned_probabilities_and_excludes_test_families(self):
+        from mcp_shield.offline import training_manifest
+        rows, heldout = split(dataset())
+        manifest = training_manifest(rows, self.model, 17)
+        for j, name in enumerate(self.model["features"]):
+            for label in (0, 1):
+                expected = (manifest["feature_positive_counts"][name][label] + 1) / (manifest["class_counts"][label] + 2)
+                self.assertEqual(expected, self.model["probabilities"][label][j])
+        self.assertFalse(set(manifest["families"]) & {r["family"] for r in heldout})
+        with self.assertRaises(ValueError):
+            training_manifest(rows, {**self.model, "prior": .1}, 17)

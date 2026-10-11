@@ -6,7 +6,7 @@ import math
 import copy
 from pathlib import Path
 
-from .core import FEATURES, FLAGS, features, inspect, language_cues, unique_fields, validate, validate_model
+from .core import FEATURES, FLAGS, features, inspect, language_cues, train, unique_fields, validate, validate_model
 
 WARNING = "Offline synthetic simulation only; observations are caller supplied, not independently verified."
 MAX_BATCH = 100
@@ -213,3 +213,18 @@ def gate_profile(value, model):
                         "score": result["uncalibrated_ml_probability"]})
     return {"warning": WARNING, "boundary": "Exhaustive synthetic gate combinations; not live enforcement.",
             "combinations": results}
+
+
+def training_manifest(rows, model, seed):
+    validate_model(model)
+    if type(seed) is not int or train(rows) != model:
+        raise ValueError("Manifest requires an integer seed and exactly matching training rows/model.")
+    if any(r.get("split") != "train" for r in rows):
+        raise ValueError("Training manifest must exclude held-out rows.")
+    vectors = [(r["label"], features(r["input"])) for r in rows]
+    return {"warning": WARNING, "seed": seed, "model_sha256": fingerprint(model), "training_sha256": fingerprint(rows),
+            "training_rows": len(rows), "families": sorted({r["family"] for r in rows}),
+            "class_counts": [sum(y == label for y, _ in vectors) for label in (0, 1)],
+            "feature_positive_counts": {name: [sum(v[j] for y, v in vectors if y == label) for label in (0, 1)]
+                                        for j, name in enumerate(FEATURES)},
+            "boundary": "Unsigned reproducibility manifest for synthetic training only, not trusted provenance."}

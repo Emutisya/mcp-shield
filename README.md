@@ -211,6 +211,10 @@ viewers; this does not change model inputs or predictions.
 `evaluate --format text --output reports\evaluation.txt` produces a concise,
 readable summary with provenance hashes, baseline comparisons, separate review
 burden, family mistakes, undefined metrics and limitations. JSON remains default.
+`train --manifest reports\training-manifest.json` exports matching training/model
+hashes, seed, training families, class counts and feature-positive counts needed
+to reconstruct Laplace-smoothed parameters. It excludes held-out rows and remains
+unsigned synthetic provenance; model and manifest writes are independently atomic.
 
 ### Run alongside the other projects
 
