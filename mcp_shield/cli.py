@@ -10,6 +10,7 @@ from .evaluation import compare_reports, evaluate, evaluate_seeds
 from .offline import compare_models, compare_observations, count_boundaries, inspect_batch, model_info, projection, read_document, receipt, representation_audit, sample_observations, sensitivity, validation_report
 from .server import MAX_BODY, make_server
 from .offline import gate_profile, replay_models
+from .exports import inspection_text
 
 
 def write_output(path, text):
@@ -50,6 +51,8 @@ def main():
     i.add_argument("input")
     i.add_argument("--model", default="models/baseline.model.json")
     i.add_argument("--receipt", action="store_true", help="Include unsigned canonical content identities")
+    i.add_argument("--format", choices=("json", "text"), default="json")
+    i.add_argument("--output", help="Atomically export the inspection without replacing input or model")
     b = sub.add_parser("batch", help="Inspect 1–100 synthetic observations atomically, offline")
     b.add_argument("input", help="JSON array of complete observation objects")
     b.add_argument("--model", default="models/baseline.model.json")
@@ -103,6 +106,10 @@ def main():
             validate_outputs([], [args.output, args.predictions])
         elif args.command == "batch":
             validate_outputs([args.input, args.model], [args.output])
+        elif args.command == "inspect":
+            validate_outputs([args.input, args.model], [args.output])
+            if args.receipt and args.format != "json":
+                raise ValueError("--receipt requires --format json.")
         if args.command == "train":
             rows, _ = split(dataset(args.seed))
             result = train(rows)
@@ -126,7 +133,11 @@ def main():
                 raise ValueError(f"Inspection input must be 1 to {MAX_BODY} bytes.")
             value = json.loads(raw.decode("utf-8"), object_pairs_hook=unique_fields)
             operation = receipt if args.receipt else inspect
-            print(json.dumps(operation(value, load_model(args.model)), indent=2))
+            result = operation(value, load_model(args.model))
+            report = inspection_text(result) if args.format == "text" else json.dumps(result, indent=2) + "\n"
+            if args.output:
+                write_output(args.output, report)
+            print(report, end="")
         elif args.command == "compare-reports":
             print(json.dumps(compare_reports(read_document(args.before), read_document(args.after)), indent=2))
         elif args.command == "evaluate-seeds":

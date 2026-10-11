@@ -200,6 +200,10 @@ metrics. Ranges are not confidence intervals; no winning seed/model is selected.
 sample count, families and ML threshold, and validates confusion count totals.
 It reports matched count deltas, refusing unlike synthetic experiments rather
 than presenting misleading improvement claims.
+`inspect examples\catalog.json --format text --output reports\inspection.txt`
+creates a readable advisory report with all present/absent contributions and
+explicit simulation limits. JSON remains the default; receipts require JSON.
+Inspection output cannot overwrite the observation input or model.
 
 ### Run alongside the other projects
 

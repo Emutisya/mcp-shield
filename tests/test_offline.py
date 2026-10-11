@@ -252,3 +252,13 @@ class OfflineTests(unittest.TestCase):
         self.assertEqual(result["combinations"][0]["decision"], "allow")
         self.assertEqual(len({tuple(r["gates"]) for r in result["combinations"]}), 16)
         self.assertTrue(all(r["decision"] == "deny" for r in result["combinations"][1:]))
+
+    def test_readable_inspection_export_retains_advisory_boundaries_and_absent_evidence(self):
+        from mcp_shield.exports import inspection_text
+        result = inspect(self.sample, self.model)
+        text = inspection_text(result)
+        self.assertIn("Advisory decision: ALLOW", text)
+        self.assertIn("not independently verified", text)
+        self.assertIn("credential_request: absent", text)
+        self.assertIn("not a safety guarantee", text)
+        self.assertNotIn(self.sample["server"]["name"], text)
