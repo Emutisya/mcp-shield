@@ -7,7 +7,8 @@ from importlib.resources import files
 from urllib.parse import urlsplit
 
 from .core import inspect, unique_fields, validate_model
-from .offline import fingerprint, model_info
+from .offline import (compare_observations, count_boundaries, fingerprint, inspect_batch,
+                      model_info, projection, receipt, sensitivity, validation_report)
 
 MAX_BODY = 16384
 
@@ -16,6 +17,16 @@ def make_server(model, port=8765):
     validate_model(model)
     model = copy.deepcopy(model)
     model_identity = fingerprint(model)
+    operations = {
+        "/api/inspect": lambda value: inspect(value, model),
+        "/api/batch": lambda value: inspect_batch(value, model),
+        "/api/compare": lambda value: compare_observations(value, model),
+        "/api/project": projection,
+        "/api/receipt": lambda value: receipt(value, model),
+        "/api/sensitivity": lambda value: sensitivity(value, model),
+        "/api/boundaries": lambda value: count_boundaries(value, model),
+        "/api/validate": validation_report,
+    }
 
     class Handler(BaseHTTPRequestHandler):
         def setup(self):
@@ -80,7 +91,7 @@ def make_server(model, port=8765):
             self.connection.settimeout(5)
             if not self.authorized():
                 return
-            if self.path != "/api/inspect":
+            if self.path not in operations:
                 self.respond(404, '{"error":"Route not found."}')
                 return
             if (len(self.headers.get_all("Content-Type", [])) != 1
@@ -100,7 +111,7 @@ def make_server(model, port=8765):
                 body = self.rfile.read(length)
                 if len(body) != length:
                     raise ValueError("Incomplete request body.")
-                result = inspect(json.loads(body.decode("utf-8"), object_pairs_hook=unique_fields), model)
+                result = operations[self.path](json.loads(body.decode("utf-8"), object_pairs_hook=unique_fields))
             except (ValueError, UnicodeError, RecursionError) as exc:
                 self.respond(400, json.dumps({"error": str(exc)}))
                 return

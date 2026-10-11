@@ -80,3 +80,21 @@ class ServerFeatureTests(unittest.TestCase):
         self.assertGreater(int(response.getheader("Content-Length")), 0)
         self.assertEqual(response.read(), b"")
         connection.close()
+
+    def test_offline_analysis_routes_preserve_cli_semantics_and_hard_gates(self):
+        denied = copy.deepcopy(self.sample)
+        denied["signals"]["unapproved_network"] = True
+        status, batch = self.request("POST", "/api/batch", [self.sample, denied])
+        self.assertEqual(status, 200)
+        self.assertEqual(batch["decisions"], {"allow": 1, "review": 0, "deny": 1})
+        comparison = self.request("POST", "/api/compare", [self.sample, denied])[1]
+        self.assertEqual(comparison["added_gates"], ["unapproved_network"])
+        self.assertEqual(comparison["after"]["decision"], "deny")
+        self.assertNotIn("decision", self.request("POST", "/api/project", self.sample)[1])
+        self.assertEqual(self.request("POST", "/api/receipt", self.sample)[1]["result"]["decision"], "allow")
+        self.assertEqual(len(self.request("POST", "/api/sensitivity", self.sample)[1]["variants"]), 5)
+        self.assertEqual(len(self.request("POST", "/api/boundaries", self.sample)[1]["groups"]), 3)
+        self.assertEqual(self.request("POST", "/api/validate", [self.sample, {}])[1]["invalid_rows"], 1)
+        self.assertEqual(self.request("POST", "/api/batch", [self.sample, {}])[0], 400)
+        self.assertEqual(self.request("POST", "/api/compare", [self.sample])[0], 400)
+        self.assertEqual(self.request("GET", "/health")[0], 200)

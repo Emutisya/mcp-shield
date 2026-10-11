@@ -248,6 +248,13 @@ still apply, and a rejected request does not disable subsequent local requests.
 HEAD follows GET routes with correct headers and no body. Unsupported methods
 receive JSON 405 recovery messages and an Allow header instead of a generic HTML
 501 response; HTTP parser failures also use bounded JSON status descriptions.
+The same offline analyses are available via POST `/api/batch`, `/api/compare`,
+`/api/project`, `/api/receipt`, `/api/sensitivity`, `/api/boundaries` and
+`/api/validate`. Bodies use the corresponding CLI shape (an array for batch,
+comparison/validation; a complete observation otherwise). All share loopback
+Host/Origin checks, strict UTF-8/JSON and the existing **16,384-byte total HTTP
+body limit**, even when a batch has fewer than 100 items. Validation reports are
+schema-only; none of these endpoints collects telemetry or executes tools.
 
 ### Run alongside the other projects
 
