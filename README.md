@@ -234,6 +234,10 @@ Triggers can overlap and must not be summed as independent human-review requests
 Fixed ±.01 and ±.05 threshold neighborhoods count raw-score observations on
 either side of 0.5/0.65, including exact ties. These diagnose threshold proximity,
 not statistical uncertainty, confidence intervals or a recommendation to tune.
+`failures --kind fn --family school --offset 0 --limit 20` pages up to 100
+synthetic ML mistakes per response with content identity and total-match count.
+`fp`, `fn` and `all` refer only to toy labels; unknown families are errors,
+and an exhausted page is an explicit empty result rather than a failed request.
 
 ### Run alongside the other projects
 

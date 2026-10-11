@@ -157,3 +157,20 @@ def compare_reports(before, after):
             "before_training_sha256": before["training_sha256"], "after_training_sha256": after["training_sha256"],
             "count_deltas": {method: {key: after[method][key] - before[method][key] for key in ("tp", "fp", "tn", "fn")}
                              for method in ("ml", "policy_nonallow_as_positive")}}
+
+
+def failure_catalogue(seed=17, family=None, kind="all", offset=0, limit=20):
+    if (kind not in ("all", "fp", "fn") or type(offset) is not int or offset < 0
+            or type(limit) is not int or not 1 <= limit <= 100):
+        raise ValueError("Failures require kind all/fp/fn, nonnegative offset and limit 1–100.")
+    report = evaluate(seed, include_predictions=True)
+    if family is not None and family not in report["test_families"]:
+        raise ValueError("Choose a declared held-out family from " + ", ".join(report["test_families"]) + ".")
+    rows = [r for r in report["predictions"] if r["ml_prediction"] != r["label"]
+            and (family is None or r["family"] == family)
+            and (kind == "all" or (kind == "fp" and r["label"] == 0) or (kind == "fn" and r["label"] == 1))]
+    return {"data": report["data"], "seed": seed, "heldout_sha256": report["heldout_sha256"],
+            "total_matching": len(rows), "offset": offset, "limit": limit,
+            "rows": rows[offset:offset + limit],
+            "next_offset": offset + limit if offset + limit < len(rows) else None,
+            "boundary": "Synthetic model mistakes against toy labels only; not confirmed attacks or safe tools."}

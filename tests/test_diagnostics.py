@@ -203,3 +203,16 @@ class DiagnosticTests(unittest.TestCase):
         self.assertEqual(group["below_threshold"], 1)
         self.assertEqual(group["at_or_above_threshold"], 1)
         self.assertEqual(group["positive_labels"], 2)
+
+    def test_failure_catalogue_paging_filters_and_empty_tail(self):
+        from mcp_shield.evaluation import failure_catalogue
+        fp = failure_catalogue(kind="fp", limit=100)
+        fn = failure_catalogue(kind="fn", limit=100)
+        all_rows = failure_catalogue(limit=100)
+        self.assertEqual(fp["total_matching"] + fn["total_matching"], all_rows["total_matching"])
+        page = failure_catalogue(offset=2, limit=3)
+        self.assertEqual(page["rows"], all_rows["rows"][2:5])
+        self.assertEqual(page["next_offset"], 5)
+        self.assertEqual(failure_catalogue(offset=1000)["rows"], [])
+        with self.assertRaises(ValueError):
+            failure_catalogue(family="not-a-family")

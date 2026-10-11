@@ -6,7 +6,7 @@ from pathlib import Path
 
 from .core import inspect, load_model, train, unique_fields
 from .data import dataset, split
-from .evaluation import compare_reports, evaluate, evaluate_seeds
+from .evaluation import compare_reports, evaluate, evaluate_seeds, failure_catalogue
 from .offline import compare_models, compare_observations, count_boundaries, inspect_batch, model_info, projection, read_document, receipt, representation_audit, sample_observations, sensitivity, validation_report
 from .server import MAX_BODY, make_server
 from .offline import check_model_identity, gate_profile, replay_models, training_manifest
@@ -108,6 +108,12 @@ def main():
     reproduction.add_argument("receipt")
     reproduction.add_argument("input")
     reproduction.add_argument("--model", default="models/baseline.model.json")
+    failures = sub.add_parser("failures", help="Page/filter synthetic ML mistakes without exposing observations")
+    failures.add_argument("--seed", type=int, default=17)
+    failures.add_argument("--family")
+    failures.add_argument("--kind", choices=("all", "fp", "fn"), default="all")
+    failures.add_argument("--offset", type=int, default=0)
+    failures.add_argument("--limit", type=int, default=20)
     s = sub.add_parser("serve", help="Serve local dashboard and real model inference")
     s.add_argument("--model", default="models/baseline.model.json")
     s.add_argument("--port", type=int, default=8765)
@@ -156,6 +162,8 @@ def main():
             if args.output:
                 write_output(args.output, report)
             print(report, end="")
+        elif args.command == "failures":
+            print(json.dumps(failure_catalogue(args.seed, args.family, args.kind, args.offset, args.limit), indent=2))
         elif args.command == "reproduce":
             print(json.dumps(reproduce_receipt(read_document(args.receipt), read_document(args.input, MAX_BODY), load_model(args.model)), indent=2))
         elif args.command == "check-model":
