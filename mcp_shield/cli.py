@@ -7,7 +7,7 @@ from pathlib import Path
 from .core import inspect, load_model, train, unique_fields
 from .data import dataset, split
 from .evaluation import evaluate
-from .offline import compare_models, compare_observations, count_boundaries, inspect_batch, model_info, read_document, receipt, sensitivity
+from .offline import compare_models, compare_observations, count_boundaries, inspect_batch, model_info, projection, read_document, receipt, sensitivity
 from .server import MAX_BODY, make_server
 
 
@@ -57,6 +57,8 @@ def main():
     bounds = sub.add_parser("boundaries", help="Simulate count feature and policy boundaries")
     bounds.add_argument("input")
     bounds.add_argument("--model", default="models/baseline.model.json")
+    project = sub.add_parser("project", help="Show validated feature representation without needing a model")
+    project.add_argument("input")
     s = sub.add_parser("serve", help="Serve local dashboard and real model inference")
     s.add_argument("--model", default="models/baseline.model.json")
     s.add_argument("--port", type=int, default=8765)
@@ -83,6 +85,8 @@ def main():
             value = json.loads(raw.decode("utf-8"), object_pairs_hook=unique_fields)
             operation = receipt if args.receipt else inspect
             print(json.dumps(operation(value, load_model(args.model)), indent=2))
+        elif args.command == "project":
+            print(json.dumps(projection(read_document(args.input, MAX_BODY)), indent=2))
         elif args.command == "boundaries":
             print(json.dumps(count_boundaries(read_document(args.input, MAX_BODY), load_model(args.model)), indent=2))
         elif args.command == "sensitivity":

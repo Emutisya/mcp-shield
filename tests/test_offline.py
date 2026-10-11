@@ -147,3 +147,13 @@ class OfflineTests(unittest.TestCase):
         self.assertEqual(result["language_cues"],
                          {"instruction_language": ["priority"], "sensitive_language": ["private"]})
         self.assertEqual(result["gates"], [])
+
+    def test_projection_is_model_independent_and_preserves_feature_order(self):
+        from mcp_shield.core import FEATURES, features
+        from mcp_shield.offline import projection
+        result = projection(self.sample)
+        self.assertEqual(list(result["features"]), list(FEATURES))
+        self.assertEqual(list(result["features"].values()), features(self.sample))
+        self.assertNotIn("decision", result)
+        with self.assertRaises(ValueError):
+            projection({})

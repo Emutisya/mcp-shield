@@ -136,6 +136,8 @@ These learned associations are not causal evidence or calibrated risk.
 `language_cues` names the exact ASCII word cues matched in inert descriptions.
 Substrings such as “tokenization” do not match “token”; innocent descriptions
 can match, and missing matches do not establish safety or multilingual coverage.
+`project examples\catalog.json` validates and shows the ten-feature representation
+and excluded metadata without loading a model. It issues no advisory verdict.
 
 ### Run alongside the other projects
 

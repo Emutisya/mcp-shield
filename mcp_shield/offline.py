@@ -6,7 +6,7 @@ import math
 import copy
 from pathlib import Path
 
-from .core import FEATURES, FLAGS, features, inspect, unique_fields, validate, validate_model
+from .core import FEATURES, FLAGS, features, inspect, language_cues, unique_fields, validate, validate_model
 
 WARNING = "Offline synthetic simulation only; observations are caller supplied, not independently verified."
 MAX_BATCH = 100
@@ -116,3 +116,11 @@ def count_boundaries(value, model):
             groups[signal].append({"hypothetical_value": count, "result": inspect(hypothetical, model)})
     return {"warning": WARNING, "boundary": "Numeric boundary simulations only; not rate estimates or remediation advice.",
             "baseline": baseline, "groups": groups}
+
+
+def projection(value):
+    vector = features(value)
+    return {"warning": WARNING, "observation_sha256": fingerprint(value),
+            "features": dict(zip(FEATURES, vector)),
+            "excluded_fields": ["server.name", "server.publisher", "tool.name"],
+            "language_cues": language_cues(value)}
