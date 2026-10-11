@@ -2,6 +2,7 @@
 
 import math
 from .evaluation import metrics
+from .core import FEATURES, features
 
 
 def labelled_scores(rows):
@@ -44,3 +45,14 @@ def classifier_policy_cross_tab(rows):
         "positive_labels": sum(r["label"] for r in rows
                                if int(r["score"] >= .5) == prediction and r["decision"] == decision),
     } for decision in ("allow", "review", "deny")} for prediction in (0, 1)}
+
+
+def feature_distribution(training, heldout):
+    if any(not isinstance(group, list) or not group for group in (training, heldout)):
+        raise ValueError("Feature distribution requires nonempty observation lists in both partitions.")
+    a, b = ([features(value) for value in group] for group in (training, heldout))
+    return {name: {"training_present": sum(v[j] for v in a), "heldout_present": sum(v[j] for v in b),
+                  "training_fraction": round(sum(v[j] for v in a) / len(a), 4),
+                  "heldout_fraction": round(sum(v[j] for v in b) / len(b), 4),
+                  "fraction_delta": round(sum(v[j] for v in b) / len(b) - sum(v[j] for v in a) / len(a), 4)}
+            for j, name in enumerate(FEATURES)}

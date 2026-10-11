@@ -185,6 +185,78 @@
       "exclusive_rows": 36
     }
   },
+  "feature_distribution": {
+    "credential_request": {
+      "training_present": 89,
+      "heldout_present": 46,
+      "training_fraction": 0.1113,
+      "heldout_fraction": 0.115,
+      "fraction_delta": 0.0038
+    },
+    "scope_violation": {
+      "training_present": 114,
+      "heldout_present": 56,
+      "training_fraction": 0.1425,
+      "heldout_fraction": 0.14,
+      "fraction_delta": -0.0025
+    },
+    "hidden_instruction": {
+      "training_present": 110,
+      "heldout_present": 53,
+      "training_fraction": 0.1375,
+      "heldout_fraction": 0.1325,
+      "fraction_delta": -0.005
+    },
+    "unapproved_network": {
+      "training_present": 103,
+      "heldout_present": 64,
+      "training_fraction": 0.1288,
+      "heldout_fraction": 0.16,
+      "fraction_delta": 0.0312
+    },
+    "unverified_publisher": {
+      "training_present": 182,
+      "heldout_present": 112,
+      "training_fraction": 0.2275,
+      "heldout_fraction": 0.28,
+      "fraction_delta": 0.0525
+    },
+    "metadata_drift": {
+      "training_present": 296,
+      "heldout_present": 160,
+      "training_fraction": 0.37,
+      "heldout_fraction": 0.4,
+      "fraction_delta": 0.03
+    },
+    "call_anomaly": {
+      "training_present": 186,
+      "heldout_present": 82,
+      "training_fraction": 0.2325,
+      "heldout_fraction": 0.205,
+      "fraction_delta": -0.0275
+    },
+    "large_response": {
+      "training_present": 230,
+      "heldout_present": 118,
+      "training_fraction": 0.2875,
+      "heldout_fraction": 0.295,
+      "fraction_delta": 0.0075
+    },
+    "instruction_language": {
+      "training_present": 150,
+      "heldout_present": 108,
+      "training_fraction": 0.1875,
+      "heldout_fraction": 0.27,
+      "fraction_delta": 0.0825
+    },
+    "sensitive_language": {
+      "training_present": 196,
+      "heldout_present": 83,
+      "training_fraction": 0.245,
+      "heldout_fraction": 0.2075,
+      "fraction_delta": -0.0375
+    }
+  },
   "gate_count_histogram": {
     "0": 244,
     "1": 103,

@@ -31,7 +31,7 @@ def metrics(pairs):
 
 
 def evaluate(seed=17, include_predictions=False):
-    from .diagnostics import classifier_policy_cross_tab, decision_burden, threshold_sweep
+    from .diagnostics import classifier_policy_cross_tab, decision_burden, feature_distribution, threshold_sweep
     if type(include_predictions) is not bool:
         raise ValueError("include_predictions must be boolean.")
     training, heldout = split(dataset(seed))
@@ -82,6 +82,7 @@ def evaluate(seed=17, include_predictions=False):
                 {"label": r["label"], "score": p["uncalibrated_ml_probability"], "decision": p["decision"]}
                 for r, p in results]),
             "gate_diagnostics": gate_diagnostics,
+            "feature_distribution": feature_distribution([r["input"] for r in training], [r["input"] for r in heldout]),
             "gate_count_histogram": {str(count): sum(len(p["gates"]) == count for _, p in results)
                                      for count in range(len(FLAGS) + 1)},
             "ml_failure_count": len(failures), "first_12_ml_failures": failures[:12],

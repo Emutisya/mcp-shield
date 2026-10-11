@@ -84,3 +84,17 @@ class DiagnosticTests(unittest.TestCase):
         self.assertEqual(sum(int(gates) * count for gates, count in histogram.items()),
                          sum(g["rows"] for g in report["gate_diagnostics"].values()))
         self.assertTrue(any(g["benign_labels"] for g in report["gate_diagnostics"].values()))
+
+    def test_feature_distribution_reports_partition_shift_without_changing_model(self):
+        import copy
+        from mcp_shield.data import dataset
+        from mcp_shield.diagnostics import feature_distribution
+        value = dataset()[0]["input"]
+        a, b = copy.deepcopy(value), copy.deepcopy(value)
+        a["signals"]["scope_violation"] = False
+        b["signals"]["scope_violation"] = True
+        result = feature_distribution([a, a], [b])
+        self.assertEqual(result["scope_violation"]["fraction_delta"], 1)
+        self.assertEqual(result["scope_violation"]["training_present"], 0)
+        with self.assertRaises(ValueError):
+            feature_distribution([], [b])

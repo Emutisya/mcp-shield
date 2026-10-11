@@ -176,6 +176,9 @@ enforcement or a request to alter genuine observations.
 Evaluation audits each hard gate's synthetic label mix and exclusive triggers,
 plus a 0–4 gate-count histogram. Per-gate counts overlap deliberately; summing them
 does not give the number of denied observations or validated attacks.
+Feature-distribution diagnostics report train/held-out presence counts, fractions
+and their differences. These describe invented distributions, not real-world
+drift detection, significance tests or calibration.
 
 ### Run alongside the other projects
 
