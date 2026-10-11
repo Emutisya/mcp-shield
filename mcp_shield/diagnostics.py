@@ -92,3 +92,17 @@ def ranking_diagnostics(rows):
     pairs = positives * (len(rows) - positives)
     return {"positive_negative_pairs": pairs, "correctly_ordered_pairs": wins, "tied_pairs": ties,
             "roc_auc": round((wins + .5 * ties) / pairs, 12) if pairs else None}
+
+
+def score_histogram(rows):
+    labelled_scores(rows)
+    edges = (0, .25, .5, .65, .75, 1)
+    result = []
+    for j, (lower, upper) in enumerate(zip(edges, edges[1:])):
+        group = [r for r in rows if lower <= r["score"] < upper or
+                 (j == len(edges) - 2 and r["score"] == 1)]
+        result.append({"lower_inclusive": lower, "upper": upper, "upper_inclusive": j == len(edges) - 2,
+                       "rows": len(group), "positive_labels": sum(r["label"] for r in group),
+                       "ml_errors": sum(int(r["score"] >= .5) != r["label"] for r in group),
+                       "mean_score": round(math.fsum(r["score"] for r in group) / len(group), 12) if group else None})
+    return result

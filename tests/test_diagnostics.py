@@ -118,3 +118,11 @@ class DiagnosticTests(unittest.TestCase):
         self.assertEqual(ranking_diagnostics([{"label": 0, "score": 0}, {"label": 1, "score": 1}])["roc_auc"], 1)
         self.assertEqual(ranking_diagnostics([{"label": 0, "score": 1}, {"label": 1, "score": 0}])["roc_auc"], 0)
         self.assertIsNone(ranking_diagnostics([{"label": 1, "score": .5}])["roc_auc"])
+
+    def test_score_histogram_places_threshold_edges_once_and_keeps_empty_bins(self):
+        from mcp_shield.diagnostics import score_histogram
+        rows = [{"label": 1, "score": s} for s in (0, .5, .65, 1)]
+        result = score_histogram(rows)
+        self.assertEqual([b["rows"] for b in result], [1, 0, 1, 1, 1])
+        self.assertIsNone(result[1]["mean_score"])
+        self.assertEqual(sum(b["ml_errors"] for b in result), 1)

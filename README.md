@@ -186,6 +186,9 @@ or held-out threshold selection uses this descriptive table.
 Ranking diagnostics report positive/negative pair counts, correctly ordered and
 tied pairs, and tie-aware ROC AUC. AUC is undefined for a single-class sample.
 It describes synthetic score ordering, not calibration or real-world detection.
+Fixed score bins expose label counts, mean score and ML errors around both model
+and review thresholds. Bins are left-inclusive; only the last includes its upper
+bound of 1. Empty bins remain visible. This does not calibrate the probabilities.
 
 ### Run alongside the other projects
 
