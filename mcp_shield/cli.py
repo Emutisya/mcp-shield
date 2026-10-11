@@ -7,7 +7,7 @@ from pathlib import Path
 from .core import inspect, load_model, train, unique_fields
 from .data import dataset, split
 from .evaluation import evaluate
-from .offline import compare_models, compare_observations, count_boundaries, inspect_batch, model_info, projection, read_document, receipt, sensitivity, validation_report
+from .offline import compare_models, compare_observations, count_boundaries, inspect_batch, model_info, projection, read_document, receipt, representation_audit, sensitivity, validation_report
 from .server import MAX_BODY, make_server
 
 
@@ -61,6 +61,8 @@ def main():
     project.add_argument("input")
     validation = sub.add_parser("validate", help="Report all invalid batch items without loading a model")
     validation.add_argument("input")
+    audit = sub.add_parser("audit-data", help="Audit synthetic feature collisions and mixed labels")
+    audit.add_argument("--seed", type=int, default=17)
     s = sub.add_parser("serve", help="Serve local dashboard and real model inference")
     s.add_argument("--model", default="models/baseline.model.json")
     s.add_argument("--port", type=int, default=8765)
@@ -87,6 +89,8 @@ def main():
             value = json.loads(raw.decode("utf-8"), object_pairs_hook=unique_fields)
             operation = receipt if args.receipt else inspect
             print(json.dumps(operation(value, load_model(args.model)), indent=2))
+        elif args.command == "audit-data":
+            print(json.dumps(representation_audit(dataset(args.seed)), indent=2))
         elif args.command == "validate":
             report = validation_report(read_document(args.input))
             print(json.dumps(report, indent=2))

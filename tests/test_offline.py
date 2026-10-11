@@ -194,3 +194,12 @@ class OfflineTests(unittest.TestCase):
             self.assertEqual(sum(g["rows"] for g in group.values()), 2)
             for d, count in result["decisions"].items():
                 self.assertEqual(sum(g["decisions"][d] for g in group.values()), count)
+
+    def test_representation_audit_detects_mixed_labels_and_overlap(self):
+        from mcp_shield.offline import representation_audit
+        rows = [{"id": str(i), "family": "a" if i < 2 else "b", "split": "train" if i < 2 else "test",
+                 "input": self.sample, "label": i % 2} for i in range(4)]
+        result = representation_audit(rows)
+        self.assertEqual(result["shared_feature_vectors"], 1)
+        self.assertEqual(result["training_mixed_label_vectors"], 1)
+        self.assertEqual(result["heldout_mixed_label_vectors"], 1)

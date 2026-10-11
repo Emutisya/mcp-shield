@@ -148,3 +148,22 @@ def validation_report(values):
     return {"warning": WARNING, "rows": len(values), "valid_rows": len(values) - len(errors),
             "invalid_rows": len(errors), "errors": errors,
             "boundary": "Schema validity is not safety, source verification or an inspection verdict."}
+
+
+def representation_audit(rows):
+    from .data import split
+    training, heldout = split(rows)
+    groups = []
+    for partition in (training, heldout):
+        vectors = {}
+        for row in partition:
+            if type(row.get("label")) is not int or row["label"] not in (0, 1):
+                raise ValueError("Representation audit requires binary integer labels.")
+            vector = tuple(features(row["input"]))
+            vectors.setdefault(vector, set()).add(row["label"])
+        groups.append(vectors)
+    return {"warning": WARNING, "training_unique_vectors": len(groups[0]), "heldout_unique_vectors": len(groups[1]),
+            "shared_feature_vectors": len(groups[0].keys() & groups[1].keys()),
+            "training_mixed_label_vectors": sum(len(labels) > 1 for labels in groups[0].values()),
+            "heldout_mixed_label_vectors": sum(len(labels) > 1 for labels in groups[1].values()),
+            "boundary": "Binary representation overlap is intentional; mixed toy labels show information the features cannot resolve."}

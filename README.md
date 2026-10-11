@@ -150,6 +150,9 @@ cohort summaries, not validated detections or population estimates.
 Evaluation cross-tabulates ML positives at 0.5 against the three policy verdicts.
 It exposes low-score denial/review and ML-positive allow separately rather than
 suggesting the learned classifier and explicit policy are interchangeable.
+`audit-data --seed 17` quantifies shared binary feature representations and
+mixed-label vectors in each synthetic partition. Mixed labels demonstrate
+irreducible ambiguity for this representation, not verified attack evidence.
 
 ### Run alongside the other projects
 
