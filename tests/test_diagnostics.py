@@ -172,3 +172,14 @@ class DiagnosticTests(unittest.TestCase):
         self.assertEqual(parsed[0]["family"], row["family"])
         self.assertEqual(parsed[0]["label"], "1")
         self.assertIn("Synthetic", parsed[0]["boundary"])
+
+    def test_readable_evaluation_exposes_burden_failures_and_undefined_values(self):
+        from mcp_shield.exports import evaluation_text
+        from mcp_shield.evaluation import evaluate
+        report = evaluate()
+        text = evaluation_text(report)
+        self.assertIn(report["heldout_sha256"], text)
+        self.assertIn("undefined", text)
+        self.assertIn("review is not denial", text)
+        self.assertIn("not real-world detection", text)
+        self.assertTrue(all(f"  {family}:" in text for family in report["test_families"]))

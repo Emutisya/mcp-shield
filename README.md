@@ -208,6 +208,9 @@ Inspection output cannot overwrite the observation input or model.
 exports a standard quoted CSV with numeric labels/scores and a synthetic-only
 boundary on every row. Formula-like text cells are neutralized for spreadsheet
 viewers; this does not change model inputs or predictions.
+`evaluate --format text --output reports\evaluation.txt` produces a concise,
+readable summary with provenance hashes, baseline comparisons, separate review
+burden, family mistakes, undefined metrics and limitations. JSON remains default.
 
 ### Run alongside the other projects
 
