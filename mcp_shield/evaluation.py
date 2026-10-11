@@ -43,6 +43,13 @@ def evaluate(seed=17, include_predictions=False):
         "positive_labels": sum(flag in p["gates"] and r["label"] == 1 for r, p in results),
         "exclusive_rows": sum(p["gates"] == [flag] for _, p in results),
     } for flag in FLAGS}
+    review_diagnostics = {trigger: {
+        "rows": sum(trigger in p["review_triggers"] for _, p in results),
+        "review_rows": sum(trigger in p["review_triggers"] and p["decision"] == "review" for _, p in results),
+        "under_hard_deny_rows": sum(trigger in p["review_triggers"] and p["decision"] == "deny" for _, p in results),
+        "benign_review_labels": sum(trigger in p["review_triggers"] and p["decision"] == "review" and r["label"] == 0 for r, p in results),
+        "exclusive_review_rows": sum(p["review_triggers"] == [trigger] and p["decision"] == "review" for _, p in results),
+    } for trigger in ("ml_threshold", "metadata_drift", "unexpected_calls", "unverified_publisher")}
     failures = [{"id": r["id"], "label": r["label"], "decision": p["decision"],
                  "score": round(p["uncalibrated_ml_probability"], 12)}
                 for r, p in results if (p["uncalibrated_ml_probability"] >= 0.5) != bool(r["label"])]
@@ -82,6 +89,7 @@ def evaluate(seed=17, include_predictions=False):
                 {"label": r["label"], "score": p["uncalibrated_ml_probability"], "decision": p["decision"]}
                 for r, p in results]),
             "gate_diagnostics": gate_diagnostics,
+            "review_diagnostics": review_diagnostics,
             "feature_distribution": feature_distribution([r["input"] for r in training], [r["input"] for r in heldout]),
             "training_feature_dependence": feature_dependence(training),
             "ranking": ranking_diagnostics([{"label": r["label"], "score": p["uncalibrated_ml_probability"]} for r, p in results]),

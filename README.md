@@ -228,6 +228,9 @@ and discrete evidence match exactly; floating values permit documented 1e-12
 relative/absolute libm tolerance. Reproduction is not source verification or safety.
 Schema recovery messages identify the failing object and missing required fields,
 and count unknown fields without echoing arbitrary untrusted keys or values.
+Review-trigger diagnostics distinguish actual review rows from triggers beneath
+hard-deny precedence, expose exclusive review causes and benign toy-label burden.
+Triggers can overlap and must not be summed as independent human-review requests.
 
 ### Run alongside the other projects
 

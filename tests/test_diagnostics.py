@@ -183,3 +183,14 @@ class DiagnosticTests(unittest.TestCase):
         self.assertIn("review is not denial", text)
         self.assertIn("not real-world detection", text)
         self.assertTrue(all(f"  {family}:" in text for family in report["test_families"]))
+
+    def test_review_trigger_audit_distinguishes_workload_from_hard_deny_overlap(self):
+        from mcp_shield.evaluation import evaluate
+        report = evaluate(include_predictions=True)
+        for trigger, group in report["review_diagnostics"].items():
+            rows = [r for r in report["predictions"] if trigger in r["review_triggers"]]
+            self.assertEqual(group["rows"], len(rows))
+            self.assertEqual(group["review_rows"] + group["under_hard_deny_rows"], len(rows))
+            self.assertEqual(group["benign_review_labels"],
+                             sum(r["decision"] == "review" and r["label"] == 0 for r in rows))
+        self.assertTrue(any(g["under_hard_deny_rows"] for g in report["review_diagnostics"].values()))

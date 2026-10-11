@@ -185,6 +185,36 @@
       "exclusive_rows": 36
     }
   },
+  "review_diagnostics": {
+    "ml_threshold": {
+      "rows": 156,
+      "review_rows": 35,
+      "under_hard_deny_rows": 121,
+      "benign_review_labels": 3,
+      "exclusive_review_rows": 0
+    },
+    "metadata_drift": {
+      "rows": 160,
+      "review_rows": 87,
+      "under_hard_deny_rows": 73,
+      "benign_review_labels": 53,
+      "exclusive_review_rows": 46
+    },
+    "unexpected_calls": {
+      "rows": 132,
+      "review_rows": 64,
+      "under_hard_deny_rows": 68,
+      "benign_review_labels": 43,
+      "exclusive_review_rows": 32
+    },
+    "unverified_publisher": {
+      "rows": 112,
+      "review_rows": 53,
+      "under_hard_deny_rows": 59,
+      "benign_review_labels": 20,
+      "exclusive_review_rows": 21
+    }
+  },
   "feature_distribution": {
     "credential_request": {
       "training_present": 89,
