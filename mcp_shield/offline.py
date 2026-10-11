@@ -2,6 +2,7 @@
 
 import json
 import hashlib
+import math
 from pathlib import Path
 
 from .core import inspect, unique_fields, validate, validate_model
@@ -46,3 +47,17 @@ def receipt(value, model):
     return {"warning": WARNING, "format_version": 1,
             "observation_sha256": fingerprint(value), "model_sha256": fingerprint(model),
             "result": result, "provenance": "Unsigned content hashes; not evidence of source authenticity."}
+
+
+def model_info(model):
+    validate_model(model)
+    return {"warning": WARNING, "model_sha256": fingerprint(model),
+            "version": model["version"], "training_rows": model["training_rows"],
+            "synthetic_class_prior": model["prior"],
+            "prior_log_odds": math.log(model["prior"]) - math.log1p(-model["prior"]),
+            "features": [{
+                "feature": name, "benign_present_probability": model["probabilities"][0][j],
+                "positive_present_probability": model["probabilities"][1][j],
+                "present_log_odds": round(math.log(model["probabilities"][1][j]) - math.log(model["probabilities"][0][j]), 12),
+                "absent_log_odds": round(math.log1p(-model["probabilities"][1][j]) - math.log1p(-model["probabilities"][0][j]), 12),
+            } for j, name in enumerate(model["features"])]}

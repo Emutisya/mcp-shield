@@ -57,3 +57,13 @@ class OfflineTests(unittest.TestCase):
         self.assertEqual(a["result"], b["result"])
         self.assertEqual(a["model_sha256"], b["model_sha256"])
         self.assertNotIn("server", a)
+
+    def test_model_introspection_exposes_absent_and_present_likelihoods(self):
+        from mcp_shield.offline import model_info
+        neutral = copy.deepcopy(self.model)
+        neutral["probabilities"] = [[.5] * 10, [.5] * 10]
+        result = model_info(neutral)
+        self.assertTrue(all(f["present_log_odds"] == f["absent_log_odds"] == 0 for f in result["features"]))
+        self.assertEqual(result["training_rows"], 800)
+        with self.assertRaises(ValueError):
+            model_info({**self.model, "prior": 0})

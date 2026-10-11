@@ -109,6 +109,9 @@ breakdowns, exposing family-specific false alarms and allowed positive labels.
 `inspect --receipt` adds canonical SHA-256 observation/model identities without
 echoing metadata. Batch exports include these identities too. These are unsigned
 content hashes, not publisher authentication or independent verification.
+`model-info --model models\baseline.model.json` exposes the learned prior,
+class-conditional probabilities and present/absent log-odds for all ten features.
+It validates the artifact before describing it and makes no authenticity claim.
 
 ### Run alongside the other projects
 

@@ -7,7 +7,7 @@ from pathlib import Path
 from .core import inspect, load_model, train, unique_fields
 from .data import dataset, split
 from .evaluation import evaluate
-from .offline import inspect_batch, read_document, receipt
+from .offline import inspect_batch, model_info, read_document, receipt
 from .server import MAX_BODY, make_server
 
 
@@ -43,6 +43,8 @@ def main():
     b.add_argument("input", help="JSON array of complete observation objects")
     b.add_argument("--model", default="models/baseline.model.json")
     b.add_argument("--output")
+    info = sub.add_parser("model-info", help="Describe local learned parameters, not safety or authenticity")
+    info.add_argument("--model", default="models/baseline.model.json")
     s = sub.add_parser("serve", help="Serve local dashboard and real model inference")
     s.add_argument("--model", default="models/baseline.model.json")
     s.add_argument("--port", type=int, default=8765)
@@ -69,6 +71,8 @@ def main():
             value = json.loads(raw.decode("utf-8"), object_pairs_hook=unique_fields)
             operation = receipt if args.receipt else inspect
             print(json.dumps(operation(value, load_model(args.model)), indent=2))
+        elif args.command == "model-info":
+            print(json.dumps(model_info(load_model(args.model)), indent=2))
         elif args.command == "batch":
             report = json.dumps(inspect_batch(read_document(args.input), load_model(args.model)), indent=2) + "\n"
             if args.output:
