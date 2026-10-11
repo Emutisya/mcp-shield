@@ -404,3 +404,15 @@ class OfflineTests(unittest.TestCase):
             main()
         self.assertIn("features", json.loads(output.getvalue()))
         self.assertEqual(errors.getvalue(), "")
+
+    def test_cli_jsonlines_stdout_has_no_blank_separator_records(self):
+        import io
+        from contextlib import redirect_stdout
+        from mcp_shield.cli import main
+        output = io.StringIO()
+        with patch("sys.argv", ["shield", "batch", "unused", "--input-format", "jsonl", "--format", "jsonl"]), \
+             patch("mcp_shield.cli.read_jsonlines", return_value=[self.sample, self.sample]), \
+             patch("mcp_shield.cli.load_model", return_value=self.model), redirect_stdout(output):
+            main()
+        rows = [json.loads(line) for line in output.getvalue().splitlines()]
+        self.assertEqual([row["index"] for row in rows], [0, 1])

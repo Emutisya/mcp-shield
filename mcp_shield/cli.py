@@ -248,7 +248,7 @@ def main():
             report = batch_jsonlines(result) if args.format == "jsonl" else json.dumps(result, indent=2) + "\n"
             if args.output:
                 write_output(args.output, report)
-            print(report)
+            print(report, end="")
         else:
             model = load_model(args.model)
             try:
