@@ -90,6 +90,23 @@ class ShieldTests(unittest.TestCase):
         self.assertTrue(all(math.isfinite(row["log_odds_contribution"]) for row in result["contributions"]))
         self.assertTrue(0 <= result["uncalibrated_ml_probability"] <= 1)
 
+    def test_rounding_cannot_move_probability_across_evaluation_threshold(self):
+        model = copy.deepcopy(self.model)
+        model["probabilities"] = [[.5] * len(model["features"]) for _ in range(2)]
+        for prior, expected in ((.4999999, 0), (.5000001, 1)):
+            model["prior"] = prior
+            probability = inspect(self.sample, model)["uncalibrated_ml_probability"]
+            self.assertAlmostEqual(probability, prior, places=10)
+            self.assertEqual(int(probability >= .5), expected)
+        model["prior"] = .5
+        model["probabilities"][1][0] = .500001
+        model["probabilities"][1][1] = .500002
+        result = inspect(self.sample, model)
+        self.assertEqual(result["contributions"][0]["feature"], model["features"][1])
+        self.assertEqual(result["contributions"][1]["feature"], model["features"][0])
+        self.assertEqual(result["contributions"][0]["log_odds_contribution"],
+                         result["contributions"][1]["log_odds_contribution"])
+
     def test_training_labels_and_artifact_metadata_are_strict(self):
         for rows in (None, [], [None], [{"input": self.sample, "label": True}],
                      [{"input": self.sample, "label": -1}], [{"input": self.sample, "label": 2}]):

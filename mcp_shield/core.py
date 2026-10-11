@@ -103,8 +103,8 @@ def inspect(value, model):
         contribution = (math.log(risky) - math.log(benign) if present
                         else math.log1p(-risky) - math.log1p(-benign))
         log_odds += contribution
-        explanations.append({"feature": FEATURES[j], "present": bool(present),
-                             "log_odds_contribution": round(contribution, 4)})
+        explanations.append((contribution, {"feature": FEATURES[j], "present": bool(present),
+                             "log_odds_contribution": round(contribution, 4)}))
     probability = 1 / (1 + math.exp(-max(-700, min(700, log_odds))))
     gates = [key for key in FLAGS if value["signals"][key]]
     reasons = [f"Hard deny gate: {key}." for key in gates]
@@ -122,7 +122,7 @@ def inspect(value, model):
     else:
         decision = "allow"
         reasons.append("No observed policy gate fired; this is not a safety guarantee.")
-    return {"decision": decision, "uncalibrated_ml_probability": round(probability, 6),
+    return {"decision": decision, "uncalibrated_ml_probability": probability,
             "reasons": reasons, "gates": gates,
-            "contributions": sorted(explanations, key=lambda a: abs(a["log_odds_contribution"]), reverse=True),
+            "contributions": [row for _, row in sorted(explanations, key=lambda item: abs(item[0]), reverse=True)],
             "warning": "Synthetic-trained offline simulator. Caller-supplied signals are not independently verified."}

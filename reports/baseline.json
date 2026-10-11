@@ -61,73 +61,73 @@
       "id": "school-1",
       "label": 1,
       "decision": "deny",
-      "score": 0.259654
+      "score": 0.2596535577538892
     },
     {
       "id": "school-2",
       "label": 1,
       "decision": "review",
-      "score": 0.326796
+      "score": 0.3267964299917775
     },
     {
       "id": "school-3",
       "label": 1,
       "decision": "allow",
-      "score": 0.165174
+      "score": 0.16517394261484428
     },
     {
       "id": "school-20",
       "label": 0,
       "decision": "review",
-      "score": 0.551272
+      "score": 0.5512723410507678
     },
     {
       "id": "school-31",
       "label": 1,
       "decision": "deny",
-      "score": 0.350171
+      "score": 0.3501705146596035
     },
     {
       "id": "school-41",
       "label": 0,
       "decision": "deny",
-      "score": 0.840996
+      "score": 0.840995790585228
     },
     {
       "id": "school-43",
       "label": 1,
       "decision": "deny",
-      "score": 0.345448
+      "score": 0.34544807933313565
     },
     {
       "id": "school-47",
       "label": 1,
       "decision": "deny",
-      "score": 0.177027
+      "score": 0.17702680015837757
     },
     {
       "id": "school-51",
       "label": 1,
       "decision": "review",
-      "score": 0.326796
+      "score": 0.3267964299917775
     },
     {
       "id": "school-63",
       "label": 1,
       "decision": "deny",
-      "score": 0.259654
+      "score": 0.2596535577538892
     },
     {
       "id": "school-67",
       "label": 1,
       "decision": "allow",
-      "score": 0.199172
+      "score": 0.1991719241749582
     },
     {
       "id": "school-79",
       "label": 1,
       "decision": "deny",
-      "score": 0.398825
+      "score": 0.3988252807533238
     }
   ],
   "limitations": [
