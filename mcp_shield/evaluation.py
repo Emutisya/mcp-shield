@@ -45,6 +45,10 @@ def evaluate(seed=17):
             "rows": len(group), "positive_labels": sum(row["label"] for row, _ in group),
             "ml": metrics([(row["label"], int(prediction["uncalibrated_ml_probability"] >= .5))
                            for row, prediction in group]),
+            "policy_nonallow_as_positive": metrics([(row["label"], int(prediction["decision"] != "allow"))
+                                                   for row, prediction in group]),
+            "decision_burden": decision_burden([{"label": row["label"], "score": prediction["uncalibrated_ml_probability"],
+                                               "decision": prediction["decision"]} for row, prediction in group]),
             "policy_decisions": {decision: sum(prediction["decision"] == decision for _, prediction in group)
                                  for decision in ("allow", "review", "deny")},
         }

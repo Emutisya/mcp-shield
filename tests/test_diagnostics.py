@@ -44,3 +44,13 @@ class DiagnosticTests(unittest.TestCase):
         self.assertEqual(sum(v["rows"] for v in burden.values()), 4)
         with self.assertRaises(ValueError):
             decision_burden(self.rows)
+
+    def test_family_policy_metrics_reconcile(self):
+        from mcp_shield.evaluation import evaluate
+        report = evaluate()
+        for key in ("tp", "fp", "tn", "fn"):
+            self.assertEqual(sum(g["policy_nonallow_as_positive"][key] for g in report["per_family"].values()),
+                             report["policy_nonallow_as_positive"][key])
+        for d in ("allow", "review", "deny"):
+            self.assertEqual(sum(g["decision_burden"][d]["benign_labels"] for g in report["per_family"].values()),
+                             report["decision_burden"][d]["benign_labels"])

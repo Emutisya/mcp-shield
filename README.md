@@ -104,6 +104,8 @@ the same held-out labels. They expose the tradeoffs of deterministic observation
 gates and maximum alert burden; none is an alternative execution policy.
 `decision_burden` separates allow/review/deny fractions and their synthetic label
 mix, so review workload is not hidden inside a binary nonallow metric.
+Every held-out family has the same policy confusion and decision-burden
+breakdowns, exposing family-specific false alarms and allowed positive labels.
 
 ### Run alongside the other projects
 

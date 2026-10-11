@@ -224,6 +224,42 @@
         "precision": 0.8039,
         "recall": 0.9762
       },
+      "policy_nonallow_as_positive": {
+        "tp": 42,
+        "fp": 31,
+        "tn": 27,
+        "fn": 0,
+        "support": 100,
+        "positive_labels": 42,
+        "specificity": 0.4655,
+        "false_positive_rate": 0.5345,
+        "false_negative_rate": 0.0,
+        "f1": 0.7304,
+        "balanced_accuracy": 0.7328,
+        "accuracy": 0.69,
+        "precision": 0.5753,
+        "recall": 1.0
+      },
+      "decision_burden": {
+        "allow": {
+          "rows": 27,
+          "benign_labels": 27,
+          "positive_labels": 0,
+          "fraction": 0.27
+        },
+        "review": {
+          "rows": 32,
+          "benign_labels": 23,
+          "positive_labels": 9,
+          "fraction": 0.32
+        },
+        "deny": {
+          "rows": 41,
+          "benign_labels": 8,
+          "positive_labels": 33,
+          "fraction": 0.41
+        }
+      },
       "policy_decisions": {
         "allow": 27,
         "review": 32,
@@ -248,6 +284,42 @@
         "accuracy": 0.9,
         "precision": 0.9286,
         "recall": 0.8478
+      },
+      "policy_nonallow_as_positive": {
+        "tp": 43,
+        "fp": 36,
+        "tn": 18,
+        "fn": 3,
+        "support": 100,
+        "positive_labels": 46,
+        "specificity": 0.3333,
+        "false_positive_rate": 0.6667,
+        "false_negative_rate": 0.0652,
+        "f1": 0.688,
+        "balanced_accuracy": 0.6341,
+        "accuracy": 0.61,
+        "precision": 0.5443,
+        "recall": 0.9348
+      },
+      "decision_burden": {
+        "allow": {
+          "rows": 21,
+          "benign_labels": 18,
+          "positive_labels": 3,
+          "fraction": 0.21
+        },
+        "review": {
+          "rows": 44,
+          "benign_labels": 26,
+          "positive_labels": 18,
+          "fraction": 0.44
+        },
+        "deny": {
+          "rows": 35,
+          "benign_labels": 10,
+          "positive_labels": 25,
+          "fraction": 0.35
+        }
       },
       "policy_decisions": {
         "allow": 21,
@@ -274,6 +346,42 @@
         "precision": 0.8919,
         "recall": 0.7857
       },
+      "policy_nonallow_as_positive": {
+        "tp": 42,
+        "fp": 35,
+        "tn": 23,
+        "fn": 0,
+        "support": 100,
+        "positive_labels": 42,
+        "specificity": 0.3966,
+        "false_positive_rate": 0.6034,
+        "false_negative_rate": 0.0,
+        "f1": 0.7059,
+        "balanced_accuracy": 0.6983,
+        "accuracy": 0.65,
+        "precision": 0.5455,
+        "recall": 1.0
+      },
+      "decision_burden": {
+        "allow": {
+          "rows": 23,
+          "benign_labels": 23,
+          "positive_labels": 0,
+          "fraction": 0.23
+        },
+        "review": {
+          "rows": 39,
+          "benign_labels": 26,
+          "positive_labels": 13,
+          "fraction": 0.39
+        },
+        "deny": {
+          "rows": 38,
+          "benign_labels": 9,
+          "positive_labels": 29,
+          "fraction": 0.38
+        }
+      },
       "policy_decisions": {
         "allow": 23,
         "review": 39,
@@ -298,6 +406,42 @@
         "accuracy": 0.88,
         "precision": 0.9565,
         "recall": 0.8148
+      },
+      "policy_nonallow_as_positive": {
+        "tp": 52,
+        "fp": 27,
+        "tn": 19,
+        "fn": 2,
+        "support": 100,
+        "positive_labels": 54,
+        "specificity": 0.413,
+        "false_positive_rate": 0.587,
+        "false_negative_rate": 0.037,
+        "f1": 0.782,
+        "balanced_accuracy": 0.688,
+        "accuracy": 0.71,
+        "precision": 0.6582,
+        "recall": 0.963
+      },
+      "decision_burden": {
+        "allow": {
+          "rows": 21,
+          "benign_labels": 19,
+          "positive_labels": 2,
+          "fraction": 0.21
+        },
+        "review": {
+          "rows": 37,
+          "benign_labels": 24,
+          "positive_labels": 13,
+          "fraction": 0.37
+        },
+        "deny": {
+          "rows": 42,
+          "benign_labels": 3,
+          "positive_labels": 39,
+          "fraction": 0.42
+        }
       },
       "policy_decisions": {
         "allow": 21,
