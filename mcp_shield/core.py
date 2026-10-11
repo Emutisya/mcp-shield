@@ -52,9 +52,14 @@ def features(value):
 
 def train(rows):
     """Laplace-smoothed Bernoulli NB; parameters learned only from supplied rows."""
+    if not isinstance(rows, (list, tuple)) or not rows:
+        raise ValueError("Training requires a nonempty sequence of labelled examples.")
     counts = [0, 0]
     positives = [[0] * len(FEATURES) for _ in range(2)]
     for row in rows:
+        if (not isinstance(row, dict) or "input" not in row
+                or type(row.get("label")) is not int or row["label"] not in (0, 1)):
+            raise ValueError("Each training example requires an input and an integer label of 0 or 1.")
         label = row["label"]
         counts[label] += 1
         for j, x in enumerate(features(row["input"])):
@@ -70,8 +75,11 @@ def train(rows):
 
 
 def validate_model(model):
-    if not isinstance(model, dict) or model.get("version") != MODEL_VERSION or model.get("features") != list(FEATURES):
+    if (not isinstance(model, dict) or type(model.get("version")) is not int
+            or model.get("version") != MODEL_VERSION or model.get("features") != list(FEATURES)):
         raise ValueError("Unsupported model version or feature layout. Retrain the model.")
+    if type(model.get("training_rows")) is not int or model["training_rows"] < 2:
+        raise ValueError("Model training_rows must be an integer of at least two.")
     p = model.get("probabilities")
     if not isinstance(p, list) or len(p) != 2 or any(not isinstance(a, list) or len(a) != len(FEATURES) for a in p):
         raise ValueError("Invalid model probability dimensions.")

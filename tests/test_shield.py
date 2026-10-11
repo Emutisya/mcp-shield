@@ -71,6 +71,16 @@ class ShieldTests(unittest.TestCase):
         self.assertEqual(len(result["contributions"]), len(features(self.sample)))
         self.assertTrue(0 <= result["uncalibrated_ml_probability"] <= 1)
 
+    def test_training_labels_and_artifact_metadata_are_strict(self):
+        for rows in (None, [], [None], [{"input": self.sample, "label": True}],
+                     [{"input": self.sample, "label": -1}], [{"input": self.sample, "label": 2}]):
+            with self.subTest(rows=rows), self.assertRaises(ValueError):
+                train(rows)
+        for field, value in (("version", True), ("training_rows", True),
+                             ("training_rows", 0), ("training_rows", None)):
+            with self.subTest(field=field, value=value), self.assertRaises(ValueError):
+                validate_model({**self.model, field: value})
+
     def test_split_is_reproducible_and_template_disjoint(self):
         self.assertEqual(self.rows, dataset())
         self.assertFalse({r["family"] for r in self.training} & {r["family"] for r in self.heldout})
