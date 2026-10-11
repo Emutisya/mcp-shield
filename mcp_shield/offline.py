@@ -228,3 +228,14 @@ def training_manifest(rows, model, seed):
             "feature_positive_counts": {name: [sum(v[j] for y, v in vectors if y == label) for label in (0, 1)]
                                         for j, name in enumerate(FEATURES)},
             "boundary": "Unsigned reproducibility manifest for synthetic training only, not trusted provenance."}
+
+
+def check_model_identity(model, expected):
+    validate_model(model)
+    if not isinstance(expected, str) or len(expected) != 64 or any(c not in "0123456789abcdef" for c in expected):
+        raise ValueError("Expected identity must be 64 lowercase SHA-256 hexadecimal characters.")
+    actual = fingerprint(model)
+    if actual != expected:
+        raise ValueError("Model content identity does not match the expected SHA-256. No inference was performed.")
+    return {"warning": WARNING, "model_sha256": actual, "content_match": True,
+            "boundary": "Matching a caller-provided unsigned hash does not authenticate a source or establish model safety."}

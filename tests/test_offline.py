@@ -274,3 +274,13 @@ class OfflineTests(unittest.TestCase):
         self.assertFalse(set(manifest["families"]) & {r["family"] for r in heldout})
         with self.assertRaises(ValueError):
             training_manifest(rows, {**self.model, "prior": .1}, 17)
+
+    def test_model_identity_check_detects_parameter_changes_and_bad_digest_format(self):
+        from mcp_shield.offline import check_model_identity, fingerprint
+        digest = fingerprint(self.model)
+        self.assertTrue(check_model_identity(self.model, digest)["content_match"])
+        with self.assertRaisesRegex(ValueError, "does not match"):
+            check_model_identity({**self.model, "prior": .1}, digest)
+        for invalid in ("", "x" * 64, digest.upper(), None):
+            with self.assertRaises(ValueError):
+                check_model_identity(self.model, invalid)

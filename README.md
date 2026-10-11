@@ -215,6 +215,9 @@ burden, family mistakes, undefined metrics and limitations. JSON remains default
 hashes, seed, training families, class counts and feature-positive counts needed
 to reconstruct Laplace-smoothed parameters. It excludes held-out rows and remains
 unsigned synthetic provenance; model and manifest writes are independently atomic.
+`check-model --sha256 <expected-content-hash>` validates the local model and
+requires exact canonical content identity, without inference. A caller-provided
+unsigned hash is not publisher authentication, independent verification or safety.
 
 ### Run alongside the other projects
 

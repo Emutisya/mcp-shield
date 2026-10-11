@@ -9,7 +9,7 @@ from .data import dataset, split
 from .evaluation import compare_reports, evaluate, evaluate_seeds
 from .offline import compare_models, compare_observations, count_boundaries, inspect_batch, model_info, projection, read_document, receipt, representation_audit, sample_observations, sensitivity, validation_report
 from .server import MAX_BODY, make_server
-from .offline import gate_profile, replay_models, training_manifest
+from .offline import check_model_identity, gate_profile, replay_models, training_manifest
 from .exports import evaluation_text, inspection_text, predictions_csv
 
 
@@ -98,6 +98,9 @@ def main():
     reports = sub.add_parser("compare-reports", help="Compare only matched held-out synthetic reports")
     reports.add_argument("before")
     reports.add_argument("after")
+    identity = sub.add_parser("check-model", help="Match a caller-provided content hash; not authentication")
+    identity.add_argument("--model", default="models/baseline.model.json")
+    identity.add_argument("--sha256", required=True)
     s = sub.add_parser("serve", help="Serve local dashboard and real model inference")
     s.add_argument("--model", default="models/baseline.model.json")
     s.add_argument("--port", type=int, default=8765)
@@ -146,6 +149,8 @@ def main():
             if args.output:
                 write_output(args.output, report)
             print(report, end="")
+        elif args.command == "check-model":
+            print(json.dumps(check_model_identity(load_model(args.model), args.sha256), indent=2))
         elif args.command == "compare-reports":
             print(json.dumps(compare_reports(read_document(args.before), read_document(args.after)), indent=2))
         elif args.command == "evaluate-seeds":
