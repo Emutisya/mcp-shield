@@ -81,11 +81,22 @@ def train(rows):
     if not isinstance(rows, (list, tuple)) or not rows:
         raise ValueError("Training requires a nonempty sequence of labelled examples.")
     counts = [0, 0]
+    ids = set()
     positives = [[0] * len(FEATURES) for _ in range(2)]
     for row in rows:
         if (not isinstance(row, dict) or "input" not in row
+                or set(row) - {"input", "label", "id", "family", "split"}
                 or type(row.get("label")) is not int or row["label"] not in (0, 1)):
             raise ValueError("Each training example requires an input and an integer label of 0 or 1.")
+        if row.get("split", "train") != "train":
+            raise ValueError("Training cannot include held-out or unknown split tags. Select training rows only.")
+        for key in ("id", "family"):
+            if key in row and (not isinstance(row[key], str) or not row[key].strip() or len(row[key]) > 120):
+                raise ValueError(f"Training {key} must be nonempty text, at most 120 characters.")
+        if "id" in row:
+            if row["id"] in ids:
+                raise ValueError("Duplicate training IDs are not accepted.")
+            ids.add(row["id"])
         label = row["label"]
         counts[label] += 1
         for j, x in enumerate(features(row["input"])):

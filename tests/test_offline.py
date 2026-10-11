@@ -323,3 +323,14 @@ class OfflineTests(unittest.TestCase):
         self.assertIn("Missing required fields: hidden_instruction", str(error.exception))
         self.assertIn("Remove 1 unknown", str(error.exception))
         self.assertNotIn("arbitrary_untrusted_field", str(error.exception))
+
+    def test_training_rejects_heldout_contamination_duplicate_ids_and_unknown_metadata(self):
+        training, heldout = split(dataset())
+        with self.assertRaisesRegex(ValueError, "held-out"):
+            train(training + heldout)
+        with self.assertRaisesRegex(ValueError, "Duplicate training"):
+            train([*training, training[0]])
+        with self.assertRaises(ValueError):
+            train([{**training[0], "unsupported_metadata": "fictional"}, training[1]])
+        minimal = [{"input": self.sample, "label": label} for label in (0, 1)]
+        self.assertEqual(train(minimal)["training_rows"], 2)

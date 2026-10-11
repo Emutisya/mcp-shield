@@ -265,6 +265,10 @@ the existing five-second socket timeout; this is not a production slow-client de
 Error replies briefly drain at most 32,768 unread transport bytes for at most
 100 milliseconds before closing, to reduce TCP resets that can obscure recovery
 messages. Drained bytes are discarded, never parsed, stored or used for inference.
+Native training rejects held-out/unknown split tags, duplicate supplied IDs and
+unsupported row metadata, preventing accidental full-dataset training. Minimal
+`input`/binary-integer-`label` rows remain supported; tags are caller supplied and
+their absence does not prove synthetic origin or independence.
 
 ### Run alongside the other projects
 
