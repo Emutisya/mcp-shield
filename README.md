@@ -179,6 +179,10 @@ does not give the number of denied observations or validated attacks.
 Feature-distribution diagnostics report train/held-out presence counts, fractions
 and their differences. These describe invented distributions, not real-world
 drift detection, significance tests or calibration.
+Training feature-dependence diagnostics show class-conditioned 2×2 counts and
+phi coefficients for every feature pair, making the naive independence assumption
+inspectable. Constant or absent-class denominators remain null. No model fitting
+or held-out threshold selection uses this descriptive table.
 
 ### Run alongside the other projects
 

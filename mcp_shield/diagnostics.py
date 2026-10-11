@@ -56,3 +56,22 @@ def feature_distribution(training, heldout):
                   "heldout_fraction": round(sum(v[j] for v in b) / len(b), 4),
                   "fraction_delta": round(sum(v[j] for v in b) / len(b) - sum(v[j] for v in a) / len(a), 4)}
             for j, name in enumerate(FEATURES)}
+
+
+def feature_dependence(rows):
+    if (not isinstance(rows, list) or not rows
+            or any(not isinstance(r, dict) or type(r.get("label")) is not int or r["label"] not in (0, 1) for r in rows)):
+        raise ValueError("Dependence diagnostics require labelled observation rows.")
+    vectors = [(r["label"], features(r["input"])) for r in rows]
+    result = []
+    for label in (0, 1):
+        group = [v for y, v in vectors if y == label]
+        for j in range(len(FEATURES)):
+            for k in range(j + 1, len(FEATURES)):
+                cells = [sum(v[j] == a and v[k] == b for v in group) for a, b in ((0, 0), (0, 1), (1, 0), (1, 1))]
+                n00, n01, n10, n11 = cells
+                denominator = math.sqrt((n11 + n10) * (n01 + n00) * (n11 + n01) * (n10 + n00))
+                result.append({"label": label, "left": FEATURES[j], "right": FEATURES[k], "rows": len(group),
+                               "cells_00_01_10_11": cells,
+                               "phi": round((n11 * n00 - n10 * n01) / denominator, 4) if denominator else None})
+    return result

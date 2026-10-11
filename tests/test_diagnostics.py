@@ -98,3 +98,16 @@ class DiagnosticTests(unittest.TestCase):
         self.assertEqual(result["scope_violation"]["training_present"], 0)
         with self.assertRaises(ValueError):
             feature_distribution([], [b])
+
+    def test_dependence_identifies_perfect_association_and_constant_features(self):
+        import copy
+        from mcp_shield.data import dataset
+        from mcp_shield.diagnostics import feature_dependence
+        a, b = (copy.deepcopy(dataset()[0]["input"]) for _ in range(2))
+        a["signals"].update(credential_request=False, scope_violation=False)
+        b["signals"].update(credential_request=True, scope_violation=True)
+        result = feature_dependence([{"input": a, "label": 0}, {"input": b, "label": 0}])
+        pair = next(r for r in result if r["label"] == 0 and r["left"] == "credential_request" and r["right"] == "scope_violation")
+        self.assertEqual(pair["phi"], 1)
+        self.assertEqual(pair["cells_00_01_10_11"], [1, 0, 0, 1])
+        self.assertTrue(all(r["phi"] is None for r in result if r["label"] == 1))
