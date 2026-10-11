@@ -115,6 +115,8 @@ It validates the artifact before describing it and makes no authenticity claim.
 `compare-models before.json after.json` localizes learned-parameter changes,
 including prior, training-row count and present/absent feature log-odds deltas.
 It does not conclude that a changed model is better, safer or calibrated.
+Model loading is bounded to 65,536 UTF-8 bytes and rejects duplicate or unknown
+artifact fields. Unsupported metadata cannot masquerade as model certification.
 
 ### Run alongside the other projects
 

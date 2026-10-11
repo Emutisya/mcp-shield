@@ -77,3 +77,13 @@ class OfflineTests(unittest.TestCase):
         self.assertNotEqual(result["features"][0]["present_log_odds_delta"], 0)
         self.assertTrue(all(r["present_log_odds_delta"] == 0 for r in result["features"][1:]))
         self.assertEqual(compare_models(self.model, self.model)["prior_delta"], 0)
+
+    def test_model_loader_bounds_and_unknown_fields(self):
+        import io
+        from mcp_shield.core import load_model, validate_model
+        with self.assertRaises(ValueError):
+            validate_model({**self.model, "claimed_certification": "unsupported"})
+        for raw in (b"", b" " * 65537, b'{"version":1,"version":1}', b"\xff"):
+            with patch.object(Path, "open", return_value=io.BytesIO(raw)):
+                with self.assertRaises(ValueError):
+                    load_model("unused")

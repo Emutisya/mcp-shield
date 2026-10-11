@@ -11,6 +11,7 @@ SIGNALS = set(FLAGS) | set(COUNTS) | {"verified_publisher"}
 FEATURES = (*FLAGS, "unverified_publisher", "metadata_drift", "call_anomaly",
             "large_response", "instruction_language", "sensitive_language")
 MODEL_VERSION = 1
+MAX_MODEL_BYTES = 65536
 
 
 def unique_fields(pairs):
@@ -84,7 +85,9 @@ def train(rows):
 
 
 def validate_model(model):
-    if (not isinstance(model, dict) or type(model.get("version")) is not int
+    if (not isinstance(model, dict)
+            or set(model) != {"version", "features", "prior", "probabilities", "training_rows"}
+            or type(model.get("version")) is not int
             or model.get("version") != MODEL_VERSION or model.get("features") != list(FEATURES)):
         raise ValueError("Unsupported model version or feature layout. Retrain the model.")
     if type(model.get("training_rows")) is not int or model["training_rows"] < 2:
@@ -99,7 +102,11 @@ def validate_model(model):
 
 
 def load_model(path):
-    return validate_model(json.loads(Path(path).read_text(encoding="utf-8"), object_pairs_hook=unique_fields))
+    with Path(path).open("rb") as source:
+        raw = source.read(MAX_MODEL_BYTES + 1)
+    if not 0 < len(raw) <= MAX_MODEL_BYTES:
+        raise ValueError(f"Model JSON must be 1 to {MAX_MODEL_BYTES} bytes. Retrain the model.")
+    return validate_model(json.loads(raw.decode("utf-8"), object_pairs_hook=unique_fields))
 
 
 def inspect(value, model):
