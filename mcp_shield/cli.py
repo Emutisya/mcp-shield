@@ -35,6 +35,7 @@ def main():
     e = sub.add_parser("evaluate", help="Retrain then evaluate on disjoint held-out synthetic families")
     e.add_argument("--output")
     e.add_argument("--seed", type=int, default=17)
+    e.add_argument("--predictions", help="Export all synthetic held-out predictions without observation metadata")
     i = sub.add_parser("inspect", help="Inspect JSON metadata; never execute tools")
     i.add_argument("input")
     i.add_argument("--model", default="models/baseline.model.json")
@@ -82,7 +83,12 @@ def main():
             write_output(target, json.dumps(result, indent=2) + "\n")
             print(f"Trained {len(rows)} synthetic rows -> {target}")
         elif args.command == "evaluate":
-            report = json.dumps(evaluate(args.seed), indent=2) + "\n"
+            result = evaluate(args.seed, include_predictions=bool(args.predictions))
+            if args.predictions:
+                rows = result.pop("predictions")
+                write_output(args.predictions, json.dumps({"data": result["data"], "seed": args.seed,
+                                                           "heldout_sha256": result["heldout_sha256"], "rows": rows}, indent=2) + "\n")
+            report = json.dumps(result, indent=2) + "\n"
             if args.output:
                 write_output(args.output, report)
             print(report)

@@ -30,8 +30,10 @@ def metrics(pairs):
             "recall": round(tp / (tp + fn), 4) if tp + fn else None}
 
 
-def evaluate(seed=17):
+def evaluate(seed=17, include_predictions=False):
     from .diagnostics import classifier_policy_cross_tab, decision_burden, threshold_sweep
+    if type(include_predictions) is not bool:
+        raise ValueError("include_predictions must be boolean.")
     training, heldout = split(dataset(seed))
     model = train(training)
     results = [(r, inspect(r["input"], model)) for r in heldout]
@@ -52,7 +54,7 @@ def evaluate(seed=17):
             "policy_decisions": {decision: sum(prediction["decision"] == decision for _, prediction in group)
                                  for decision in ("allow", "review", "deny")},
         }
-    return {"data": "Explicitly synthetic; latent toy labels, not verified attacks.",
+    report = {"data": "Explicitly synthetic; latent toy labels, not verified attacks.",
             "training_sha256": hashlib.sha256(json.dumps(training, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest(),
             "heldout_sha256": hashlib.sha256(json.dumps(heldout, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest(),
             "seed": seed, "train_rows": len(training), "test_rows": len(heldout),
@@ -84,3 +86,10 @@ def evaluate(seed=17):
                 "Scores are uncalibrated; no calibration or real attack corpus is available.",
                 "Review is not deny; binary policy metrics count both as nonallow.",
             ]}
+    if include_predictions:
+        report["predictions"] = [{"id": r["id"], "family": r["family"], "label": r["label"],
+                                  "score": round(p["uncalibrated_ml_probability"], 12),
+                                  "ml_prediction": int(p["uncalibrated_ml_probability"] >= .5),
+                                  "decision": p["decision"], "gates": p["gates"],
+                                  "review_triggers": p["review_triggers"]} for r, p in results]
+    return report

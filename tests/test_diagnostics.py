@@ -62,3 +62,14 @@ class DiagnosticTests(unittest.TestCase):
         self.assertEqual(result["0"]["deny"]["rows"], 1)
         self.assertEqual(result["1"]["allow"]["positive_labels"], 1)
         self.assertEqual(sum(v["rows"] for g in result.values() for v in g.values()), 4)
+
+    def test_full_prediction_export_reconciles_confusion_without_metadata(self):
+        from mcp_shield.evaluation import evaluate, metrics
+        report = evaluate(include_predictions=True)
+        rows = report["predictions"]
+        self.assertEqual(len(rows), report["test_rows"])
+        self.assertEqual(metrics([(r["label"], r["ml_prediction"]) for r in rows]), report["ml"])
+        self.assertTrue(all("input" not in r and "server" not in r for r in rows))
+        self.assertNotIn("predictions", evaluate())
+        with self.assertRaises(ValueError):
+            evaluate(include_predictions=1)

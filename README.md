@@ -156,6 +156,10 @@ irreducible ambiguity for this representation, not verified attack evidence.
 `samples --family school --count 10 --seed 17 --output examples\school-batch.json`
 exports 1–100 fictional observations directly compatible with `batch`/`validate`.
 Only predeclared generator families are accepted; no real telemetry is collected.
+`evaluate --predictions reports\predictions.json` exports all held-out row IDs,
+families, toy labels, display scores, full-precision classifications and policy
+triggers without raw observation metadata. This enables audit beyond twelve
+example failures. Summary export remains independently atomic.
 
 ### Run alongside the other projects
 
