@@ -12,6 +12,7 @@ from .server import MAX_BODY, make_server
 from .offline import check_model_identity, gate_profile, replay_models, training_manifest
 from .exports import batch_jsonlines, evaluation_text, inspection_text, predictions_csv
 from .offline import model_stability, prepare_review, read_jsonlines, reproduce_receipt
+from .offline import compare_scenarios
 
 
 def write_output(path, text):
@@ -121,6 +122,9 @@ def main():
     review.add_argument("input")
     review.add_argument("--model", default="models/baseline.model.json")
     review.add_argument("--output")
+    scenarios = sub.add_parser("scenarios", help="Compare 1–24 hypothetical scenarios against a shared first baseline")
+    scenarios.add_argument("input")
+    scenarios.add_argument("--model", default="models/baseline.model.json")
     s = sub.add_parser("serve", help="Serve local dashboard and real model inference")
     s.add_argument("--model", default="models/baseline.model.json")
     s.add_argument("--port", type=int, default=8765)
@@ -169,6 +173,8 @@ def main():
             if args.output:
                 write_output(args.output, report)
             print(report, end="")
+        elif args.command == "scenarios":
+            print(json.dumps(compare_scenarios(read_document(args.input), load_model(args.model)), indent=2))
         elif args.command == "review-packet":
             report = json.dumps(prepare_review(read_document(args.input, MAX_BODY), load_model(args.model)), indent=2) + "\n"
             if args.output:

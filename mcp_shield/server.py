@@ -11,7 +11,7 @@ from importlib.resources import files
 from urllib.parse import urlsplit
 
 from .core import inspect, unique_fields, validate_model
-from .offline import (compare_observations, count_boundaries, fingerprint, inspect_batch,
+from .offline import (compare_observations, compare_scenarios, count_boundaries, fingerprint, inspect_batch,
                       model_info, projection, receipt, sensitivity, validation_report)
 
 MAX_BODY = 16384
@@ -48,6 +48,7 @@ def make_server(model, port=8765, max_workers=8, body_timeout=5):
         "/api/inspect": lambda value: inspect(value, model),
         "/api/batch": lambda value: inspect_batch(value, model),
         "/api/compare": lambda value: compare_observations(value, model),
+        "/api/scenarios": lambda value: compare_scenarios(value, model),
         "/api/project": projection,
         "/api/receipt": lambda value: receipt(value, model),
         "/api/sensitivity": lambda value: sensitivity(value, model),

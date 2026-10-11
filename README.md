@@ -278,6 +278,10 @@ an unsigned evidence receipt and observation-specific questions for a separate
 human review. Every packet remains **not_reviewed**. Denial offers no override,
 allow is not approval, and no reviewer identities, approval state or execution
 are collected or stored. Unknown observations must not be invented as false.
+`scenarios observations.json` and POST `/api/scenarios` compare 1–24 complete
+hypothetical observations against a shared first baseline. Every candidate retains
+its independent gate verdict, feature delta and unsigned identity. Comparisons
+are not sequential remediation, and genuine observations must never be falsified.
 
 ### Run alongside the other projects
 

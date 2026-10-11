@@ -358,3 +358,16 @@ class OfflineTests(unittest.TestCase):
         self.assertTrue({"metadata_drift", "unverified_publisher"} <= {q["topic"] for q in packet["questions"]})
         self.assertNotIn("approved", packet)
         self.assertIn("does not establish safety", prepare_review(self.sample, self.model)["next_step"])
+
+    def test_shared_baseline_scenarios_are_not_sequential_changes(self):
+        from mcp_shield.offline import compare_scenarios
+        denied, review = copy.deepcopy(self.sample), copy.deepcopy(self.sample)
+        denied["signals"]["scope_violation"] = True
+        review["signals"]["metadata_changes"] = 1
+        report = compare_scenarios([self.sample, denied, review], self.model)
+        self.assertEqual(report["scenarios"][0]["added_gates"], ["scope_violation"])
+        self.assertEqual(report["scenarios"][1]["removed_gates"], [])
+        self.assertEqual(report["scenarios"][1]["changed_features"], ["metadata_drift"])
+        self.assertEqual(report["scenarios"][1]["result"]["decision"], "review")
+        with self.assertRaises(ValueError):
+            compare_scenarios([self.sample] * 26, self.model)

@@ -125,10 +125,28 @@ def compare_observations(values, model):
     x, y = (features(v) for v in values)
     return {"warning": WARNING, "model_sha256": batch["model_sha256"],
             "observation_sha256": batch["observation_sha256"], "before": a, "after": b,
-            "probability_delta": b["uncalibrated_ml_probability"] - a["uncalibrated_ml_probability"],
+            **comparison_details(a, b, x, y)}
+
+
+def comparison_details(a, b, x, y):
+    return {"probability_delta": b["uncalibrated_ml_probability"] - a["uncalibrated_ml_probability"],
             "changed_features": [name for name, left, right in zip(FEATURES, x, y) if left != right],
             "added_gates": sorted(set(b["gates"]) - set(a["gates"])),
             "removed_gates": sorted(set(a["gates"]) - set(b["gates"]))}
+
+
+def compare_scenarios(values, model):
+    if not isinstance(values, list) or not 2 <= len(values) <= 25:
+        raise ValueError("Scenario comparison requires 2–25 complete observations, baseline first.")
+    batch = inspect_batch(values, model)
+    baseline = batch["results"][0]
+    x = features(values[0])
+    return {"warning": WARNING, "model_sha256": batch["model_sha256"], "baseline": baseline,
+            "baseline_sha256": batch["observation_sha256"][0],
+            "scenarios": [{"index": index, "observation_sha256": batch["observation_sha256"][index],
+                           "result": result, **comparison_details(baseline, result, x, features(values[index]))}
+                          for index, result in enumerate(batch["results"][1:], start=1)],
+            "boundary": "All variants compare with the same first observation, not sequential remediation. Never falsify genuine evidence."}
 
 
 def sensitivity(value, model):

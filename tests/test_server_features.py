@@ -90,6 +90,8 @@ class ServerFeatureTests(unittest.TestCase):
         comparison = self.request("POST", "/api/compare", [self.sample, denied])[1]
         self.assertEqual(comparison["added_gates"], ["unapproved_network"])
         self.assertEqual(comparison["after"]["decision"], "deny")
+        scenarios = self.request("POST", "/api/scenarios", [self.sample, denied, self.sample])[1]
+        self.assertEqual([s["result"]["decision"] for s in scenarios["scenarios"]], ["deny", "allow"])
         self.assertNotIn("decision", self.request("POST", "/api/project", self.sample)[1])
         self.assertEqual(self.request("POST", "/api/receipt", self.sample)[1]["result"]["decision"], "allow")
         self.assertEqual(len(self.request("POST", "/api/sensitivity", self.sample)[1]["variants"]), 5)
