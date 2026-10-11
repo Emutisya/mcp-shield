@@ -1,5 +1,7 @@
 {
   "data": "Explicitly synthetic; latent toy labels, not verified attacks.",
+  "training_sha256": "9171a6bb54385813bb7c844774acde6b828dd75373443717e12f80731d586890",
+  "heldout_sha256": "4e4f6dfb82d56e5fec602f74603ab6673975e4e4e6eee75e0f4cee2add4a1ded",
   "seed": 17,
   "train_rows": 800,
   "test_rows": 400,

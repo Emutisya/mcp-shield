@@ -1,6 +1,7 @@
 import copy
 from contextlib import redirect_stderr
 import io
+import hashlib
 import http.client
 import json
 import math
@@ -140,6 +141,15 @@ class ShieldTests(unittest.TestCase):
         self.assertGreater(report["ml"]["fp"], 0)
         self.assertEqual(sum(report["policy_decisions"].values()), report["test_rows"])
         self.assertEqual(report, json.loads((ROOT / "reports" / "baseline.json").read_text()))
+
+    def test_evaluation_manifest_tracks_training_and_heldout_inputs(self):
+        report = evaluate()
+        for key, rows in (("training_sha256", self.training), ("heldout_sha256", self.heldout)):
+            expected = hashlib.sha256(json.dumps(rows, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+            self.assertEqual(report[key], expected)
+        changed = evaluate(seed=18)
+        self.assertNotEqual(changed["training_sha256"], report["training_sha256"])
+        self.assertNotEqual(changed["heldout_sha256"], report["heldout_sha256"])
 
     def test_metric_inputs_reject_empty_and_nonbinary_predictions(self):
         for pairs in (None, [], [(1,)], [(2, 0)], [(True, 1)], [(0, 0.0)]):

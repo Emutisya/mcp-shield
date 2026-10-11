@@ -1,5 +1,7 @@
 """Held-out synthetic evaluation separating ML classification from policy."""
 
+import hashlib
+import json
 from .core import inspect, train
 from .data import dataset, split
 
@@ -29,6 +31,8 @@ def evaluate(seed=17):
                  "score": p["uncalibrated_ml_probability"]}
                 for r, p in results if (p["uncalibrated_ml_probability"] >= 0.5) != bool(r["label"])]
     return {"data": "Explicitly synthetic; latent toy labels, not verified attacks.",
+            "training_sha256": hashlib.sha256(json.dumps(training, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest(),
+            "heldout_sha256": hashlib.sha256(json.dumps(heldout, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest(),
             "seed": seed, "train_rows": len(training), "test_rows": len(heldout),
             "split": "Whole families held out; description templates disjoint; names/tags excluded from features.",
             "train_families": sorted({r["family"] for r in training}),
